@@ -238,6 +238,15 @@
       margin-bottom: 16px;
     }
 
+    .player-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 12px;
+      border: 3px solid var(--border-default);
+    }
+
     .player-score {
       font-size: 48px;
       line-height: 56px;
@@ -473,20 +482,8 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text-inverse);
-    }
-
-    .avatar-pedro {
-      background: var(--brand);
-    }
-
-    .avatar-william {
-      background: #7C3AED;
+      object-fit: cover;
+      border: 2px solid var(--border-default);
     }
 
     .user-name {
@@ -564,6 +561,7 @@
     const EDIT_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
     const STORAGE_KEY = 'placar_votes';
     const HISTORY_KEY = 'placar_history';
+    const SESSION_KEY = 'placar_session';
 
     function getToday() {
       const d = new Date();
@@ -650,6 +648,8 @@
     // Render functions
     function renderLogin() {
       const app = document.getElementById('app');
+      const session = restoreSession();
+      const lastUser = session || '—';
       app.innerHTML = `
         <div class="card login-card fade-in">
           <h2>Quem é você?</h2>
@@ -658,6 +658,7 @@
             <input type="text" id="nameInput" placeholder="Pedro ou William" autocomplete="off">
             <button class="btn btn-primary" onclick="handleLogin()">Entrar</button>
           </div>
+          <p style="font-size:12px;color:var(--text-muted);margin-top:16px;">Último acesso: ${lastUser}</p>
         </div>
       `;
       document.getElementById('nameInput').focus();
@@ -679,6 +680,7 @@
         return;
       }
       currentUser = name;
+      localStorage.setItem(SESSION_KEY, JSON.stringify({ user: name, ts: Date.now() }));
       renderBoard();
     }
 
@@ -743,7 +745,7 @@
         <div class="fade-in">
           <div class="user-bar">
             <div class="user-info">
-              <div class="user-avatar avatar-${currentUser.toLowerCase()}">${currentUser[0]}</div>
+              <img class="user-avatar" src="assets/img/${currentUser.toLowerCase()}-conty.jpg" alt="${currentUser}">
               <span class="user-name">${currentUser}</span>
             </div>
             <button class="btn btn-ghost btn-sm" onclick="handleLogout()">Sair</button>
@@ -752,12 +754,14 @@
           <div class="card">
             <div class="scoreboard">
               <div class="player-card card ${currentUser === 'Pedro' ? 'active' : ''}">
+                <img class="player-avatar" src="assets/img/pedro-conty.jpg" alt="Pedro">
                 <div class="player-name">Pedro</div>
                 <div class="player-score ${pedroScore === null ? 'locked' : ''}">${pedroScore !== null ? pedroScore : '—'}</div>
                 ${pedroScore !== null && hasVoted('Pedro', today) && !canEdit('Pedro', today) ? '<div class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Votou</div>' : ''}
               </div>
               <div class="vs">vs</div>
               <div class="player-card card ${currentUser === 'William' ? 'active' : ''}">
+                <img class="player-avatar" src="assets/img/william-conty.jpg" alt="William">
                 <div class="player-name">William</div>
                 <div class="player-score ${williamScore === null ? 'locked' : ''}">${williamScore !== null ? williamScore : '—'}</div>
                 ${williamScore !== null && hasVoted('William', today) && !canEdit('William', today) ? '<div class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Votou</div>' : ''}
@@ -858,6 +862,7 @@
     function handleLogout() {
       if (timerInterval) clearInterval(timerInterval);
       currentUser = null;
+      localStorage.removeItem(SESSION_KEY);
       renderLogin();
     }
 
@@ -892,8 +897,27 @@
       }, 1000);
     }
 
+    // Restore session from localStorage
+    function restoreSession() {
+      try {
+        const session = JSON.parse(localStorage.getItem(SESSION_KEY));
+        if (session && PLAYERS.includes(session.user)) {
+          // Session expires after 24 hours
+          if (Date.now() - session.ts < 24 * 60 * 60 * 1000) {
+            return session.user;
+          }
+        }
+      } catch { /* ignore */ }
+      return null;
+    }
+
     // Init
-    renderLogin();
+    currentUser = restoreSession();
+    if (currentUser) {
+      renderBoard();
+    } else {
+      renderLogin();
+    }
   </script>
 </body>
 </html>
