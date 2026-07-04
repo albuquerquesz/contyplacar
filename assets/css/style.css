@@ -1,0 +1,536 @@
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --brand: #2563EB;
+      --brand-hover: #1D4ED8;
+      --brand-active: #1E40AF;
+      --success: #16A34A;
+      --error: #DC2626;
+      --warning: #F59E0B;
+      --info: #3B82F6;
+
+      --text-primary: #111827;
+      --text-secondary: #4B5563;
+      --text-muted: #9CA3AF;
+      --text-inverse: #FFFFFF;
+
+      --surface: #FFFFFF;
+      --canvas: #F9FAFB;
+      --muted-surface: #F3F4F6;
+
+      --border-default: #E5E7EB;
+      --border-muted: #F3F4F6;
+      --border-strong: #D1D5DB;
+      --border-focus: #2563EB;
+
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+      --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+      --shadow-lg: 0 20px 40px rgba(0,0,0,0.12);
+
+      --radius-xs: 4px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+
+      --font: 'Inter', system-ui, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        padding: 48px 24px;
+      }
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 30px;
+      line-height: 38px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 16px;
+      line-height: 24px;
+      color: var(--text-secondary);
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-default);
+      margin-bottom: 24px;
+    }
+
+    /* Login */
+    .login-card {
+      max-width: 400px;
+      margin: 80px auto 0;
+      text-align: center;
+    }
+
+    .login-card h2 {
+      font-size: 24px;
+      line-height: 32px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .login-card p {
+      font-size: 14px;
+      line-height: 20px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      font-family: var(--font);
+      height: 48px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-strong);
+      padding: 0 16px;
+      font-size: 16px;
+      line-height: 24px;
+      color: var(--text-primary);
+      background: var(--surface);
+      outline: none;
+      transition: border-color 200ms ease-out, box-shadow 200ms ease-out;
+      width: 100%;
+    }
+
+    input::placeholder {
+      color: var(--text-muted);
+    }
+
+    input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Buttons */
+    .btn {
+      font-family: var(--font);
+      height: 48px;
+      border-radius: var(--radius-md);
+      border: none;
+      padding: 0 24px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 200ms ease-out;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--brand);
+      color: var(--text-inverse);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--brand-hover);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      background: var(--brand-active);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--brand);
+      color: var(--brand);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: rgba(37, 99, 235, 0.04);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+    }
+
+    .btn-ghost:hover:not(:disabled) {
+      background: var(--muted-surface);
+    }
+
+    .btn-sm {
+      height: 40px;
+      padding: 0 16px;
+      font-size: 14px;
+    }
+
+    /* Scoreboard */
+    .scoreboard {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .player-card {
+      text-align: center;
+      padding: 32px 16px;
+    }
+
+    .player-card.active {
+      border-color: var(--brand);
+      background: rgba(37, 99, 235, 0.02);
+    }
+
+    .player-name {
+      font-size: 20px;
+      line-height: 28px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .player-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 12px;
+      border: 3px solid var(--border-default);
+    }
+
+    .player-score {
+      font-size: 48px;
+      line-height: 56px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .player-score.locked {
+      color: var(--text-secondary);
+    }
+
+    .vs {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* Vote section */
+    .vote-section {
+      text-align: center;
+    }
+
+    .vote-section h3 {
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+    }
+
+    .vote-input-group {
+      display: flex;
+      gap: 8px;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    .vote-input-group input {
+      flex: 1;
+    }
+
+    /* Timer */
+    .timer {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      background: var(--muted-surface);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-top: 16px;
+    }
+
+    .timer.warning {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+
+    .timer.expired {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+
+    .timer-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .timer.warning .timer-dot {
+      background: var(--warning);
+    }
+
+    .timer.expired .timer-dot {
+      background: var(--error);
+    }
+
+    /* Status badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-xs);
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 500;
+      margin-top: 12px;
+    }
+
+    .badge-success {
+      background: #DCFCE7;
+      color: #166534;
+    }
+
+    .badge-warning {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+
+    .badge-info {
+      background: #DBEAFE;
+      color: #1E40AF;
+    }
+
+    /* History */
+    .history-card h3 {
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      background: var(--canvas);
+    }
+
+    .history-date {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .history-scores {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .history-scores .pedro {
+      color: var(--brand);
+    }
+
+    .history-scores .william {
+      color: #7C3AED;
+    }
+
+    .history-scores .dash {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .history-winner {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: var(--radius-xs);
+    }
+
+    .winner-pedro {
+      background: #DBEAFE;
+      color: #1E40AF;
+    }
+
+    .winner-william {
+      background: #EDE9FE;
+      color: #5B21B6;
+    }
+
+    .winner-tie {
+      background: var(--muted-surface);
+      color: var(--text-secondary);
+    }
+
+    /* Total score */
+    .total-section {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .total-item {
+      text-align: center;
+    }
+
+    .total-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .total-value {
+      font-size: 36px;
+      line-height: 44px;
+      font-weight: 700;
+    }
+
+    .total-pedro {
+      color: var(--brand);
+    }
+
+    .total-william {
+      color: #7C3AED;
+    }
+
+    /* User info bar */
+    .user-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-muted);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border-default);
+    }
+
+    .user-name {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 300ms ease-out;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 24px;
+        line-height: 32px;
+      }
+
+      .player-score {
+        font-size: 36px;
+        line-height: 44px;
+      }
+
+      .scoreboard {
+        gap: 8px;
+      }
+
+      .player-card {
+        padding: 24px 8px;
+      }
+
+      .total-section {
+        gap: 32px;
+      }
+
+      .total-value {
+        font-size: 30px;
+        line-height: 38px;
+      }
+
+      .history-item {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+      }
+    }
