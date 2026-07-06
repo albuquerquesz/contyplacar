@@ -4,7 +4,6 @@ import { env } from '@/lib/env'
 
 export async function middleware(request: Request) {
   const requestUrl = new URL(request.url)
-
   const response = NextResponse.next()
 
   const supabase = createServerClient(
@@ -13,18 +12,23 @@ export async function middleware(request: Request) {
     {
       cookies: {
         getAll() {
-          const cookies = Object.fromEntries(
-            request.headers.get('cookie')?.split('; ').map(c => {
-              const [name, ...rest] = c.split('=')
-              return [name.trim(), rest.join('=')]
-            }) ?? []
-          )
-          return Object.entries(cookies).map(([name, value]) => ({ name, value }))
+          const cookieHeader = request.headers.get('cookie')
+          if (!cookieHeader) return []
+          const cookies: { name: string; value: string }[] = []
+          for (const pair of cookieHeader.split('; ')) {
+            const [name, ...rest] = pair.split('=')
+            cookies.push({ name: name.trim(), value: rest.join('=') })
+          }
+          return cookies
         },
         setAll(cookiesToSet) {
           for (const cookie of cookiesToSet) {
             response.cookies.set(cookie.name, cookie.value, {
               path: '/',
+              sameSite: 'lax',
+              secure: process.env.NODE_ENV === 'production',
+              httpOnly: true,
+              maxAge: 60 * 60 * 24 * 30,
             })
           }
         },
@@ -46,5 +50,5 @@ export async function middleware(request: Request) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/match/:path*', '/invite/:path*'],
+  matcher: ['/dashboard/:path*', '/match/:path*'],
 }
