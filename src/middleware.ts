@@ -36,7 +36,7 @@ export async function middleware(request: Request) {
   const user = data?.user
 
   const protectedPaths = ['/dashboard', '/match']
-  const isProtected = protectedPaths.some(p => requestUrl.pathname.startsWith(p))
+  const isProtected = protectedPaths.some(p => requestUrl.pathname === p || requestUrl.pathname.startsWith(p + '/'))
 
   if (isProtected && !user) {
     return NextResponse.redirect(new URL('/login', request.url))

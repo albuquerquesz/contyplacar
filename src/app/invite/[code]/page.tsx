@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { createClient as createServerClient } from '@/lib/supabase/server'
 
 export default async function InvitePage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params
@@ -21,6 +20,18 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Convite Inválido</h1>
           <p className="text-gray-500">Este convite não existe ou já expirou.</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Check expiration
+  if (new Date(invitation.expires_at) < new Date()) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Convite Expirado</h1>
+          <p className="text-gray-500">Este convite já expirou.</p>
         </div>
       </div>
     )
@@ -51,7 +62,7 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
       <form
         action={async () => {
           'use server'
-          const supabase = await createServerClient()
+          const supabase = await createClient()
           const { data: { user } } = await supabase.auth.getUser()
           if (!user) return redirect('/login')
 

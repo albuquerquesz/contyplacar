@@ -43,13 +43,16 @@ export default function VoteSection({
     if (isNaN(num) || num < 0 || num > 999) return
 
     setLoading(true)
-    await fetch('/api/scores', {
+    const res = await fetch('/api/scores', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ matchId, score: num }),
     })
     setLoading(false)
-    setHasVoted(true)
+
+    if (res.ok) {
+      setHasVoted(true)
+    }
   }
 
   if (hasVoted && !timeLeft) {

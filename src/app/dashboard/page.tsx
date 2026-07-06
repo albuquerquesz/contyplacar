@@ -12,7 +12,7 @@ export default async function DashboardPage() {
     return redirect('/login')
   }
 
-  // Fetch matches
+  // Fetch matches where user is either player
   const { data: matches } = await supabase
     .from('matches')
     .select(`
@@ -20,7 +20,7 @@ export default async function DashboardPage() {
       player1:player1_id(id, name, email, avatar_url),
       player2:player2_id(id, name, email, avatar_url)
     `)
-    .in('matches!player1_id,player2_id', [user.id])
+    .or(`player1_id.eq.${user.id},player2_id.eq.${user.id}`)
 
   // Fetch sent invitations
   const { data: sentInvitations } = await supabase
@@ -49,7 +49,7 @@ export default async function DashboardPage() {
           <div className="mt-8">
             <h2 className="text-lg font-semibold text-gray-700 mb-4">Convites Enviados</h2>
             <div className="space-y-2">
-              {sentInvitations.map((inv: any) => (
+              {sentInvitations.map((inv) => (
                 <div key={inv.id} className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
                   <p className="text-sm text-gray-600">
                     Link: <code className="text-blue-600">{inv.link_code}</code>

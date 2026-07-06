@@ -40,6 +40,7 @@ create table if not exists invitations (
   id            uuid primary key default gen_random_uuid(),
   sender_id     uuid not null references profiles(id) on delete cascade,
   link_code     text not null unique,
+  match_id      uuid references matches(id) on delete set null,
   status        text not null default 'pending' check (status in ('pending', 'accepted', 'expired')),
   expires_at    timestamptz not null,
   created_at    timestamptz not null default now()
@@ -84,10 +85,11 @@ create policy "Match participants can view scores"
     )
   );
 
-create policy "Match participants can insert scores"
+create policy "Match participants can insert their own scores"
   on scores for insert
   with check (
-    exists (
+    auth.uid() = player_id
+    and exists (
       select 1 from matches m
       where m.id = scores.match_id
       and auth.uid() in (m.player1_id, m.player2_id)
