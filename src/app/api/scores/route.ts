@@ -1,0 +1,70 @@
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+
+const EDIT_WINDOW_MS = 5 * 60 * 1000
+
+export async function POST(request: Request) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { matchId, score } = await request.json()
+
+  if (!matchId || score === undefined) {
+    return NextResponse.json({ error: 'Missing matchId or score' }, { status: 400 })
+  }
+
+  const today = new Date().toISOString().split('T')[0]
+
+  // Check if user is part of the match
+  const { data: match } = await supabase
+    .from('matches')
+    .select('player1_id, player2_id')
+    .eq('id', matchId)
+    .single()
+
+  if (!match || (match.player1_id !== user.id && match.player2_id !== user.id)) {
+    return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
+  }
+
+  // Check if already voted and within edit window
+  const { data: existing } = await supabase
+    .from('scores')
+    .select('updated_at')
+    .eq('match_id', matchId)
+    .eq('player_id', user.id)
+    .eq('date', today)
+    .single()
+
+  if (existing) {
+    const elapsed = Date.now() - new Date(existing.updated_at).getTime()
+    if (elapsed > EDIT_WINDOW_MS) {
+      return NextResponse.json({ error: 'Edit window expired' }, { status: 403 })
+    }
+  }
+
+  // Upsert score
+  const { error } = await supabase
+    .from('scores')
+    .upsert(
+      {
+        match_id: matchId,
+        player_id: user.id,
+        score,
+        date: today,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: 'match_id,player_id,date',
+      }
+    )
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ ok: true })
+}
