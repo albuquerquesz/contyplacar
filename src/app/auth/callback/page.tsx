@@ -1,23 +1,36 @@
 'use client'
 
 import { useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 export default function CallbackPage() {
   const router = useRouter()
 
   useEffect(() => {
-    const supabase = createClient()
+    let mounted = true
 
-    supabase.auth.onAuthStateChange((_event) => {
-      supabase.auth.getSession().then(({ data }) => {
-        if (data?.session) {
-          router.push('/dashboard')
-          router.refresh()
-        }
-      })
-    })
+    const handleCallback = async () => {
+      const supabase = createClient()
+
+      // Exchange the OAuth code for a session
+      const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.search)
+
+      if (!mounted) return
+
+      if (error || !data?.session) {
+        console.error('Auth callback error:', error)
+        router.replace('/login?error=auth_failed')
+        return
+      }
+
+      router.replace('/dashboard')
+    }
+
+    handleCallback()
+    return () => {
+      mounted = false
+    }
   }, [router])
 
   return (
