@@ -2,40 +2,56 @@
 
 import { useState, useEffect } from 'react'
 
-const EDIT_WINDOW_MS = 5 * 60 * 1000 // 5 minutes
+const EDIT_WINDOW_MS = 60 * 1000
 
 export default function VoteSection({
   matchId,
   currentScore,
-  votedAt,
+  updatedAt,
 }: {
   matchId: string
   currentScore: number | null
-  votedAt: string | null
+  updatedAt: string | null
 }) {
   const [score, setScore] = useState(currentScore?.toString() ?? '')
   const [timeLeft, setTimeLeft] = useState('')
-  const [hasVoted, setHasVoted] = useState(currentScore !== null)
+  const [savedAt, setSavedAt] = useState(updatedAt)
+  const [hasSubmitted, setHasSubmitted] = useState(currentScore !== null)
   const [loading, setLoading] = useState(false)
-  const isEditing = currentScore !== null
+  const canEdit = hasSubmitted
+  const hasWindowExpired = hasSubmitted && !timeLeft
 
   useEffect(() => {
-    if (!votedAt) return
+    setSavedAt(updatedAt)
+    setHasSubmitted(currentScore !== null)
+  }, [currentScore, updatedAt])
+
+  useEffect(() => {
+    if (!savedAt) return
+
     const interval = setInterval(() => {
-      const elapsed = Date.now() - new Date(votedAt).getTime()
+      const elapsed = Date.now() - new Date(savedAt).getTime()
       const remaining = EDIT_WINDOW_MS - elapsed
       if (remaining <= 0) {
         clearInterval(interval)
         setTimeLeft('')
-        setHasVoted(true)
       } else {
-        const mins = Math.floor(remaining / 60000)
-        const secs = Math.floor((remaining % 60000) / 1000)
-        setTimeLeft(`${mins}:${secs.toString().padStart(2, '0')}`)
+        const secs = Math.floor(remaining / 1000)
+        setTimeLeft(`${secs}s`)
       }
     }, 1000)
+
+    const elapsed = Date.now() - new Date(savedAt).getTime()
+    const remaining = EDIT_WINDOW_MS - elapsed
+    if (remaining <= 0) {
+      setTimeLeft('')
+    } else {
+      const secs = Math.floor(remaining / 1000)
+      setTimeLeft(`${secs}s`)
+    }
+
     return () => clearInterval(interval)
-  }, [votedAt])
+  }, [savedAt])
 
   async function handleSubmit() {
     const num = parseInt(score)
@@ -50,11 +66,12 @@ export default function VoteSection({
     setLoading(false)
 
     if (res.ok) {
-      setHasVoted(true)
+      setSavedAt(new Date().toISOString())
+      setHasSubmitted(true)
     }
   }
 
-  if (hasVoted && !timeLeft) {
+  if (hasWindowExpired) {
     return (
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <div className="flex items-center gap-3">
@@ -62,8 +79,8 @@ export default function VoteSection({
             ✓
           </div>
           <div className="min-w-0">
-            <p className="font-semibold text-gray-900">Voto registrado</p>
-            <p className="text-sm text-gray-500">Volte amanhã para votar novamente.</p>
+            <p className="font-semibold text-gray-900">Pontuação registrada</p>
+            <p className="text-sm text-gray-500">Volte amanhã para registrar outra pontuação.</p>
           </div>
         </div>
       </div>
@@ -74,10 +91,12 @@ export default function VoteSection({
     <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="mb-4">
         <h3 className="text-base font-semibold text-gray-900">
-          {isEditing ? 'Editar voto' : 'Seu voto'}
+          {canEdit ? 'Editar pontuação' : 'Registrar pontuação'}
         </h3>
         <p className="mt-1 text-sm text-gray-500">
-          {isEditing ? 'Você pode ajustar sua pontuação dentro da janela de edição.' : 'Digite sua pontuação de hoje.'}
+          {canEdit
+            ? 'Você pode corrigir a pontuação por até 1 minuto após salvar.'
+            : 'Registre a pontuação de hoje. Se errar, você pode corrigir por até 1 minuto.'}
         </p>
       </div>
 
@@ -96,12 +115,12 @@ export default function VoteSection({
           disabled={loading || score === ''}
           className="inline-flex h-12 items-center justify-center rounded-2xl bg-blue-600 px-6 font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? 'Salvando...' : isEditing ? 'Salvar' : 'Votar'}
+          {loading ? 'Salvando...' : canEdit ? 'Atualizar pontuação' : 'Salvar pontuação'}
         </button>
       </div>
       {timeLeft && (
         <p className="mt-3 text-sm font-medium text-orange-600">
-          <span className="font-mono">⏱ {timeLeft}</span> para editar
+          <span className="font-mono">⏱ {timeLeft}</span> para corrigir
         </p>
       )}
     </div>

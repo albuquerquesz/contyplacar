@@ -150,10 +150,7 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <div>
-              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 12.679m0 0l-1.94-1.179m1.94 1.179L9 7.604m0 4.375l1.956 1.179m-1.956-1.179L8 4.556M9 12.679l1.94 1.179m0 0l1.94-1.179m-1.94 1.179L12 7.604m0 4.375L13.956 13.158M12 21v-8.679m0 0l1.94 1.179m-1.94-1.179L12 7.604m0 4.375l-1.94 1.179" />
-                </svg>
+              <h2 className="text-xl font-bold text-gray-900">
                 Suas Disputas
               </h2>
             </div>
