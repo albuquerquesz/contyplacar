@@ -110,7 +110,6 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
 
         <VoteSection
           matchId={id}
-          userId={user.id}
           currentScore={userScore?.score ?? null}
           votedAt={userScore?.updated_at ?? null}
         />

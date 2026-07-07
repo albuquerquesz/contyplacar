@@ -1,15 +1,82 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+
+async function acceptInvitationAction(formData: FormData) {
+  'use server'
+
+  const code = String(formData.get('code') ?? '')
+  if (!code) {
+    return redirect('/dashboard')
+  }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return redirect(`/login?next=${encodeURIComponent(`/invite/${code}`)}`)
+  }
+
+  const admin = createAdminClient()
+  const { data: invitation, error: invitationError } = await admin
+    .from('invitations')
+    .select('id, sender_id, expires_at, status')
+    .eq('link_code', code)
+    .eq('status', 'pending')
+    .single()
+
+  if (invitationError || !invitation) {
+    return redirect(`/invite/${code}`)
+  }
+
+  if (new Date(invitation.expires_at) < new Date()) {
+    await admin.from('invitations').update({ status: 'expired' }).eq('id', invitation.id)
+    return redirect(`/invite/${code}`)
+  }
+
+  const { data: match, error: matchError } = await admin
+    .from('matches')
+    .insert({
+      player1_id: invitation.sender_id,
+      player2_id: user.id,
+      status: 'active',
+    })
+    .select('id')
+    .single()
+
+  if (matchError || !match) {
+    return redirect(`/invite/${code}`)
+  }
+
+  const { error: updateError } = await admin
+    .from('invitations')
+    .update({ status: 'accepted', match_id: match.id })
+    .eq('id', invitation.id)
+
+  if (updateError) {
+    return redirect(`/invite/${code}`)
+  }
+
+  return redirect(`/match/${match.id}`)
+}
 
 export default async function InvitePage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  // Find invitation
-  const { data: invitation } = await supabase
+  if (!user) {
+    return redirect(`/login?next=${encodeURIComponent(`/invite/${code}`)}`)
+  }
+
+  const admin = createAdminClient()
+  const { data: invitation } = await admin
     .from('invitations')
-    .select('*, sender:sender_id(id, name, email)')
+    .select('id, sender_id, expires_at, sender:sender_id(id, name, email)')
     .eq('link_code', code)
     .eq('status', 'pending')
     .single()
@@ -25,8 +92,8 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
     )
   }
 
-  // Check expiration
   if (new Date(invitation.expires_at) < new Date()) {
+    await admin.from('invitations').update({ status: 'expired' }).eq('id', invitation.id)
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4">
         <div className="text-center">
@@ -37,59 +104,15 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
     )
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Entre para Aceitar</h1>
-          <p className="text-gray-500 mb-8">
-            {invitation.sender?.name} te convidou para uma disputa!
-          </p>
-          <a
-            href="/login"
-            className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-8 py-3 text-white font-semibold hover:bg-blue-700 transition-colors"
-          >
-            Entrar com Google
-          </a>
-        </div>
-      </div>
-    )
-  }
-
   // User is logged in — accept invitation
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
-      <form
-        action={async () => {
-          'use server'
-          const supabase = await createClient()
-          const { data: { user } } = await supabase.auth.getUser()
-          if (!user) return redirect('/login')
-
-          // Create match
-          const { data: match } = await supabase
-            .from('matches')
-            .insert({
-              player1_id: invitation.sender_id,
-              player2_id: user.id,
-              status: 'active',
-            })
-            .select()
-            .single()
-
-          // Update invitation
-          await supabase
-            .from('invitations')
-            .update({ status: 'accepted', match_id: match?.id })
-            .eq('id', invitation.id)
-
-          return redirect(`/match/${match?.id}`)
-        }}
-      >
+      <form action={acceptInvitationAction}>
+        <input type="hidden" name="code" value={code} />
         <div className="text-center max-w-md">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Aceitar Convite</h1>
           <p className="text-gray-500 mb-8">
-            Você vai criar uma disputa com {invitation.sender?.name}.
+            Você vai criar uma disputa com {(invitation.sender as { name?: string } | null)?.name ?? 'este amigo'}.
           </p>
           <button
             type="submit"

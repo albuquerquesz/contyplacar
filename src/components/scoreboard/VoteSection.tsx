@@ -6,12 +6,10 @@ const EDIT_WINDOW_MS = 5 * 60 * 1000 // 5 minutes
 
 export default function VoteSection({
   matchId,
-  userId,
   currentScore,
   votedAt,
 }: {
   matchId: string
-  userId: string
   currentScore: number | null
   votedAt: string | null
 }) {

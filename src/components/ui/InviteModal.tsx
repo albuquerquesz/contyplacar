@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import confetti from 'canvas-confetti'
 
 interface InviteModalProps {
@@ -11,22 +11,21 @@ interface InviteModalProps {
 
 export default function InviteModal({ open, link, onClose }: InviteModalProps) {
   const [copied, setCopied] = useState(false)
-
-  useEffect(() => {
-    if (!open) {
-      setCopied(false)
-    }
-  }, [open])
+  const handleClose = useCallback(() => {
+    setCopied(false)
+    onClose()
+  }, [onClose])
 
   useEffect(() => {
     if (!open) return
 
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') handleClose()
     }
+
     window.addEventListener('keydown', handleEscape)
     return () => window.removeEventListener('keydown', handleEscape)
-  }, [open, onClose])
+  }, [open, handleClose])
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(link)
@@ -43,7 +42,7 @@ export default function InviteModal({ open, link, onClose }: InviteModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40" onClick={handleClose} />
       <div className="relative bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
         <h3 className="text-xl font-bold text-gray-900 mb-1">Link de convite</h3>
         <p className="text-sm text-gray-500 mb-6">
@@ -59,20 +58,12 @@ export default function InviteModal({ open, link, onClose }: InviteModalProps) {
           />
         </div>
 
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            Fechar
-          </button>
-          <button
-            onClick={handleCopy}
-            className="flex-1 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
-          >
-            {copied ? '✓ Copiado!' : 'Copiar link'}
-          </button>
-        </div>
+        <button
+          onClick={handleCopy}
+          className="w-full rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+        >
+          {copied ? '✓ Copiado!' : 'Copiar link'}
+        </button>
       </div>
     </div>
   )

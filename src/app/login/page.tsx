@@ -1,18 +1,24 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { getSafeInternalPath } from '@/lib/redirect'
+import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
+  const searchParams = useSearchParams()
+  const next = getSafeInternalPath(searchParams.get('next'))
 
   async function signIn() {
     setLoading(true)
     const supabase = createClient()
+    const callbackUrl = new URL('/auth/callback', window.location.origin)
+    callbackUrl.searchParams.set('next', next)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL ?? window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl.toString(),
       },
     })
 
@@ -26,7 +32,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
       <div className="text-center max-w-md w-full">
         <h1 className="text-4xl font-bold text-gray-900 mb-2">Placar</h1>
-        <p className="text-lg text-gray-500 mb-12">Pedro vs William</p>
+        <p className="text-lg text-gray-500 mb-12">Entrar com Google</p>
         <button
           onClick={signIn}
           disabled={loading}

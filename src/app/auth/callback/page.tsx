@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getSafeInternalPath } from '@/lib/redirect'
 
 export default function CallbackPage() {
   const router = useRouter()
@@ -12,6 +13,7 @@ export default function CallbackPage() {
 
     const handleCallback = async () => {
       const supabase = createClient()
+      const next = getSafeInternalPath(new URLSearchParams(window.location.search).get('next'))
 
       // Exchange the OAuth code for a session
       const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.search)
@@ -24,7 +26,7 @@ export default function CallbackPage() {
         return
       }
 
-      router.replace('/dashboard')
+      router.replace(next)
     }
 
     handleCallback()
