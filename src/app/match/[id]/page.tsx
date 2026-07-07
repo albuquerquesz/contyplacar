@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import Scoreboard from '@/components/scoreboard/Scoreboard'
 import VoteSection from '@/components/scoreboard/VoteSection'
 import HistoryList from '@/components/scoreboard/HistoryList'
-import UserBar from '@/components/auth/UserBar'
 
 export default async function MatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -94,14 +93,11 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Placar</h1>
-            <p className="text-gray-500">
-              {match.player1.name} vs {match.player2.name}
-            </p>
-          </div>
-          <UserBar userId={user.id} />
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Placar</h1>
+          <p className="text-gray-500">
+            {match.player1.name} vs {match.player2.name}
+          </p>
         </div>
 
         <Scoreboard

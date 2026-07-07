@@ -17,6 +17,14 @@ export async function POST(request: Request) {
 
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
+  // Ensure profile exists (trigger may not have run for existing users)
+  await supabase.from('profiles').upsert({
+    id: user.id,
+    name: user.user_metadata?.name ?? user.email?.split('@')[0] ?? 'User',
+    email: user.email ?? '',
+    avatar_url: user.user_metadata?.avatar_url ?? null,
+  }, { onConflict: 'id' })
+
   const { error } = await supabase.from('invitations').insert({
     sender_id: user.id,
     link_code: linkCode,

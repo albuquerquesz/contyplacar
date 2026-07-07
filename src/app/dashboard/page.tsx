@@ -2,17 +2,15 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import MatchList from '@/components/dashboard/MatchList'
 import InviteForm from '@/components/dashboard/InviteForm'
-import UserBar from '@/components/auth/UserBar'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
+  if (!user)
     return redirect('/login')
-  }
 
-  // Fetch matches where user is either player
+
   const { data: matches } = await supabase
     .from('matches')
     .select(`
@@ -22,7 +20,6 @@ export default async function DashboardPage() {
     `)
     .or(`player1_id.eq.${user.id},player2_id.eq.${user.id}`)
 
-  // Fetch sent invitations
   const { data: sentInvitations } = await supabase
     .from('invitations')
     .select('*, sender:sender_id(id, name, email)')
@@ -33,11 +30,6 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <UserBar userId={user.id} />
-        </div>
-
         <InviteForm userId={user.id} />
 
         <div className="mt-8">

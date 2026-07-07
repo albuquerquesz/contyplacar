@@ -20,6 +20,7 @@ export default function InviteForm({ userId }: { userId: string }) {
       setLinkCode(code)
       setCopied(false)
     }
+
     setLoading(false)
   }
 
