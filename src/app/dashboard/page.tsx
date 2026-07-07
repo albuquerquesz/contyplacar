@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import MatchList from '@/components/dashboard/MatchList'
 import InviteModal from '@/components/ui/InviteModal'
@@ -21,11 +22,14 @@ type Match = {
 }
 
 export default function DashboardPage() {
+  const router = useRouter()
   const [matches, setMatches] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
   const [inviteLink, setInviteLink] = useState<string | null>(null)
   const [generating, setGenerating] = useState(false)
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
+  const [userName, setUserName] = useState('Usuário')
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
   useEffect(() => {
     let active = true
@@ -42,6 +46,10 @@ export default function DashboardPage() {
         }
         return
       }
+
+      const metadata = user.user_metadata ?? {}
+      setUserName(metadata.name ?? user.email?.split('@')[0] ?? 'Usuário')
+      setAvatarUrl(metadata.avatar_url ?? null)
 
       const { data, error } = await supabase
         .from('matches')
@@ -63,6 +71,12 @@ export default function DashboardPage() {
       active = false
     }
   }, [])
+
+  const handleSignOut = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.replace('/login')
+  }
 
   const generateInviteLink = async () => {
     setGenerating(true)
@@ -99,6 +113,38 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <header className="border-b border-gray-200">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-6 pb-5">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 overflow-hidden rounded-full bg-gray-200 ring-1 ring-gray-300">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={userName}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-gray-100 text-sm font-semibold text-gray-600">
+                  {userName.slice(0, 1).toUpperCase()}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <button
+            onClick={handleSignOut}
+            className="inline-flex items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+            aria-label="Sair"
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 17l5-5-5-5" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H3" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 3v18" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Disputas Section */}
         <div>
