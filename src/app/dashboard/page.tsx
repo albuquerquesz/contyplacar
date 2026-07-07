@@ -147,7 +147,6 @@ export default function DashboardPage() {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Disputas Section */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <div>

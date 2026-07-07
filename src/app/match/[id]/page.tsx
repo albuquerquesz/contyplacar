@@ -43,10 +43,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
     .eq('date', today)
 
   const userScore = todayScores?.find(s => s.player_id === user.id)
-  const player1Today = todayScores?.find(s => s.player_id === match.player1.id)
-  const player2Today = todayScores?.find(s => s.player_id === match.player2.id)
 
-  // Fetch totals
   const { data: totalScores } = await supabase
     .from('scores')
     .select('player_id, score')
@@ -57,7 +54,6 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
     totals[s.player_id] = (totals[s.player_id] || 0) + s.score
   })
 
-  // Fetch history (dates where both players voted)
   const { data: allScores } = await supabase
     .from('scores')
     .select('player_id, score, date')
@@ -91,29 +87,31 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 py-8">
-
-        <div className="mt-8">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm text-center">
-              <p className="text-sm text-gray-500 mb-1">{match.player1.name}</p>
+      <div className="mx-auto max-w-2xl px-4 py-8 sm:py-10">
+        <div className="mt-6">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="rounded-2xl border border-gray-200 bg-white h-50 p-4 text-center shadow-sm">
+              <p className="mb-1 text-sm text-gray-500">{match.player1.name}</p>
               <p className="text-3xl font-bold text-blue-600">{player1Total}</p>
             </div>
-            <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm text-center">
-              <p className="text-sm text-gray-500 mb-1">{match.player2.name}</p>
-              <p className="text-3xl font-bold text-purple-600">{player2Total}</p>
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 text-center shadow-sm">
+              <p className="mb-1 text-sm text-gray-500">{match.player2.name}</p>
+              <p className="text-3xl font-bold text-blue-600">{player2Total}</p>
             </div>
           </div>
         </div>
 
-        <VoteSection
-          matchId={id}
-          currentScore={userScore?.score ?? null}
-          votedAt={userScore?.updated_at ?? null}
-        />
+        <div className='mt-8'>
+          <VoteSection
+            matchId={id}
+            currentScore={userScore?.score ?? null}
+            votedAt={userScore?.updated_at ?? null}
+          />
+        </div>
+
 
         <div className="mt-8">
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">Histórico</h2>
+          <h2 className="mb-4 text-lg font-semibold text-gray-800">Histórico</h2>
           <HistoryList
             history={history.slice(0, 10)}
             player1Name={match.player1.name}

@@ -17,6 +17,7 @@ export default function VoteSection({
   const [timeLeft, setTimeLeft] = useState('')
   const [hasVoted, setHasVoted] = useState(currentScore !== null)
   const [loading, setLoading] = useState(false)
+  const isEditing = currentScore !== null
 
   useEffect(() => {
     if (!votedAt) return
@@ -55,41 +56,52 @@ export default function VoteSection({
 
   if (hasVoted && !timeLeft) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm text-center">
-        <div className="inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-1.5 text-sm font-medium text-green-700">
-          ✓ Votou
+      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-700">
+            ✓
+          </div>
+          <div className="min-w-0">
+            <p className="font-semibold text-gray-900">Voto registrado</p>
+            <p className="text-sm text-gray-500">Volte amanhã para votar novamente.</p>
+          </div>
         </div>
-        <p className="text-sm text-gray-500 mt-3">Volte amanhã para votar novamente!</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-      <h3 className="font-semibold text-gray-900 mb-4">
-        {currentScore !== null ? 'Editar Voto' : 'Seu Voto'}
-      </h3>
-      <div className="flex gap-3">
+    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="mb-4">
+        <h3 className="text-base font-semibold text-gray-900">
+          {isEditing ? 'Editar voto' : 'Seu voto'}
+        </h3>
+        <p className="mt-1 text-sm text-gray-500">
+          {isEditing ? 'Você pode ajustar sua pontuação dentro da janela de edição.' : 'Digite sua pontuação de hoje.'}
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-3 sm:flex-row">
         <input
           type="number"
           min={0}
           max={999}
           value={score}
           onChange={e => setScore(e.target.value)}
-          className="flex-1 rounded-xl border border-gray-300 px-4 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="h-12 w-full rounded-xl border border-gray-300 bg-white px-4 text-lg text-gray-900 outline-none transition-shadow focus:border-blue-500 focus:ring-4 focus:ring-blue-100 sm:flex-1"
           placeholder="0-999"
         />
         <button
           onClick={handleSubmit}
           disabled={loading || score === ''}
-          className="rounded-2xl bg-blue-600 px-6 py-2 text-white font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+          className="inline-flex h-12 items-center justify-center rounded-2xl bg-blue-600 px-6 font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? 'Salvando...' : currentScore !== null ? 'Salvar' : 'Votar'}
+          {loading ? 'Salvando...' : isEditing ? 'Salvar' : 'Votar'}
         </button>
       </div>
       {timeLeft && (
-        <p className="text-sm text-orange-500 mt-3 font-mono">
-          ⏱ {timeLeft} para editar
+        <p className="mt-3 text-sm font-medium text-orange-600">
+          <span className="font-mono">⏱ {timeLeft}</span> para editar
         </p>
       )}
     </div>

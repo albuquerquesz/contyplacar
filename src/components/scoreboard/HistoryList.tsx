@@ -9,15 +9,15 @@ export default function HistoryList({
 }) {
   if (history.length === 0) {
     return (
-      <div className="text-center py-8 bg-white rounded-2xl border border-gray-200 shadow-sm">
-        <p className="text-gray-500">Nenhum resultado ainda.</p>
-        <p className="text-sm text-gray-400 mt-1">Ambos precisam votar para registrar uma rodada.</p>
+      <div className="rounded-2xl border border-gray-200 bg-white px-6 py-8 text-center shadow-sm">
+        <p className="font-medium text-gray-700">Nenhum resultado ainda.</p>
+        <p className="mt-1 text-sm text-gray-400">Ambos precisam votar para registrar uma rodada.</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {history.map((entry) => {
         const winner =
           entry.player1Score > entry.player2Score
@@ -26,12 +26,12 @@ export default function HistoryList({
               ? player2Name
               : 'Empate'
 
-        const winnerColor =
+        const winnerStyles =
           winner === player1Name
-            ? 'bg-blue-100 text-blue-700'
+            ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-100'
             : winner === player2Name
-              ? 'bg-purple-100 text-purple-700'
-              : 'bg-gray-100 text-gray-700'
+              ? 'bg-purple-50 text-purple-700 ring-1 ring-purple-100'
+              : 'bg-gray-100 text-gray-700 ring-1 ring-gray-200'
 
         const date = new Date(entry.date + 'T12:00:00')
         const dateStr = date.toLocaleDateString('pt-BR', {
@@ -43,15 +43,19 @@ export default function HistoryList({
         return (
           <div
             key={entry.date}
-            className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm flex items-center justify-between"
+            className="rounded-2xl border border-gray-200 bg-white px-4 py-4 shadow-sm"
           >
-            <span className="text-sm text-gray-500">{dateStr}</span>
-            <span className="font-semibold text-gray-900">
-              {entry.player1Score} — {entry.player2Score}
-            </span>
-            <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${winnerColor}`}>
-              {winner}
-            </span>
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-gray-600">{dateStr}</p>
+                <p className="mt-1 text-lg font-semibold tracking-tight text-gray-900">
+                  {entry.player1Score} <span className="text-gray-300">—</span> {entry.player2Score}
+                </p>
+              </div>
+              <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${winnerStyles}`}>
+                {winner}
+              </span>
+            </div>
           </div>
         )
       })}
