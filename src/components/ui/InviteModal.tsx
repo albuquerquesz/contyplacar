@@ -46,7 +46,7 @@ export default function InviteModal({ open, link, onClose }: InviteModalProps) {
       <div className="relative bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
         <h3 className="text-xl font-bold text-gray-900 mb-1">Link de convite</h3>
         <p className="text-sm text-gray-500 mb-6">
-          Compartilhe este link com seu amigo para começar a disputar!
+          Compartilhe este link com seu amigo para começar a registrar a pontuação da disputa!
         </p>
 
         <div className="flex items-center gap-2 mb-6">

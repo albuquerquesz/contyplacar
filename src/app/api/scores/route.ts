@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-const EDIT_WINDOW_MS = 5 * 60 * 1000
+const EDIT_WINDOW_MS = 60 * 1000
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
   }
 
-  // Check if already voted and within edit window
+  // Check if already submitted today and still within the correction window.
   const { data: existing } = await supabase
     .from('scores')
     .select('updated_at')
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
   if (existing) {
     const elapsed = Date.now() - new Date(existing.updated_at).getTime()
-    if (elapsed > EDIT_WINDOW_MS) {
+    if (elapsed >= EDIT_WINDOW_MS) {
       return NextResponse.json({ error: 'Edit window expired' }, { status: 403 })
     }
   }

@@ -19,7 +19,7 @@ export default function MatchList({ matches }: { matches: Match[] }) {
   if (matches.length === 0) {
     return (
       <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 shadow-sm">
-        <p className="text-gray-500">Nenhuma disputa ainda.</p>
+        <p className="text-gray-500">Nenhum placar de disputa ainda.</p>
         <p className="text-sm text-gray-400 mt-1">Convide um amigo para começar!</p>
       </div>
     )

@@ -19,7 +19,7 @@ export default function VoteSection({
   const [hasSubmitted, setHasSubmitted] = useState(currentScore !== null)
   const [loading, setLoading] = useState(false)
   const canEdit = hasSubmitted
-  const hasWindowExpired = hasSubmitted && !timeLeft
+  const hasWindowExpired = hasSubmitted && !!savedAt && Date.now() - new Date(savedAt).getTime() >= EDIT_WINDOW_MS
 
   useEffect(() => {
     setSavedAt(updatedAt)

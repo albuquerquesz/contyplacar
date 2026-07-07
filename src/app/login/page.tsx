@@ -34,7 +34,7 @@ function LoginPageInner() {
       <div className="text-center max-w-md w-full">
         <h1 className="text-4xl font-bold text-gray-900 mb-2">Seja bem vindo!</h1>
         <p className="text-lg text-gray-500 mb-12">
-          Organize disputas, registre votos e acompanhe o placar e o histórico em um só lugar.
+          Registre a pontuação da disputa, acompanhe o placar e veja o histórico em um só lugar.
         </p>
         <button
           onClick={signIn}

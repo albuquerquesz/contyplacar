@@ -11,7 +11,7 @@ export default function HistoryList({
     return (
       <div className="rounded-2xl border border-gray-200 bg-white px-6 py-8 text-center shadow-sm">
         <p className="font-medium text-gray-700">Nenhum resultado ainda.</p>
-        <p className="mt-1 text-sm text-gray-400">Ambos precisam votar para registrar uma rodada.</p>
+        <p className="mt-1 text-sm text-gray-400">Os dois participantes precisam registrar a pontuação para fechar uma rodada.</p>
       </div>
     )
   }
