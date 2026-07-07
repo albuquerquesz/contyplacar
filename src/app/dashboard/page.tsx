@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import MatchList from '@/components/dashboard/MatchList'
+import InviteModal from '@/components/ui/InviteModal'
 
 type Player = {
   id: string
@@ -100,16 +101,13 @@ export default function DashboardPage() {
                 </svg>
                 Suas Disputas
               </h2>
-              <p className="text-sm text-gray-500 mt-0.5">Acompanhe todas as suas disputas em um só lugar.</p>
             </div>
             <button
               onClick={generateInviteLink}
               disabled={generating}
               className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-2.5 text-white font-semibold hover:bg-blue-700 transition-colors shadow-sm flex-shrink-0 disabled:opacity-50 text-sm"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10v2m0 0v2m0-2h3m-3 0h-3m-2 0h2" />
-              </svg>
+              <span className="text-lg leading-none">+</span>
               Convidar amigo
             </button>
           </div>
@@ -174,9 +172,7 @@ export default function DashboardPage() {
                 disabled={generating}
                 className="inline-flex items-center gap-2 rounded-2xl border-2 border-blue-600 px-6 py-2.5 text-blue-600 font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10v2m0 0v2m0-2h3m-3 0h-3m-2 0h2" />
-                </svg>
+                <span className="text-lg leading-none">+</span>
                 Convidar amigo
               </button>
             </div>
