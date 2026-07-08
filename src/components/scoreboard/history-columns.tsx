@@ -34,18 +34,10 @@ export const historyColumns: ColumnDef<HistoryEntry>[] = [
         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
       >
         Participante
-        <ArrowUpDown className="h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
-        <Avatar className="size-9">
-          <AvatarImage
-            src={row.original.playerAvatarUrl ?? undefined}
-            alt={row.original.playerName}
-          />
-          <AvatarFallback>{getInitials(row.original.playerName)}</AvatarFallback>
-        </Avatar>
         <div className="min-w-0">
           <p className="truncate font-medium text-foreground">{row.original.playerName}</p>
         </div>
@@ -63,7 +55,6 @@ export const historyColumns: ColumnDef<HistoryEntry>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
           Pontuação
-          <ArrowUpDown className="h-4 w-4" />
         </Button>
       </div>
     ),
@@ -82,7 +73,6 @@ export const historyColumns: ColumnDef<HistoryEntry>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
           Registrado em
-          <ArrowUpDown className="h-4 w-4" />
         </Button>
       </div>
     ),

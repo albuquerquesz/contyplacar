@@ -34,6 +34,9 @@ function LoginPageInner() {
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
       <div className="text-center max-w-md w-full">
         <h1 className="text-4xl font-bold text-gray-900 mb-2">Seja bem vindo!</h1>
+        <p className="text-lg text-gray-500 mb-6">
+          Registre a pontuação da disputa, acompanhe o placar e veja o histórico em um só lugar.
+        </p>
         <Button onClick={signIn} disabled={loading} fullWidth loading={loading}>
           {loading ? 'Conectando...' : (
             <>

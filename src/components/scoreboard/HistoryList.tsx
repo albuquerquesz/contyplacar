@@ -25,8 +25,6 @@ export default function HistoryList({ history }: { history: HistoryEntry[] }) {
     { id: 'recordedAt', desc: true },
   ])
 
-  // TanStack Table returns instance functions that the React Compiler intentionally skips memoizing.
-  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: history,
     columns: historyColumns,
@@ -40,7 +38,7 @@ export default function HistoryList({ history }: { history: HistoryEntry[] }) {
   })
 
   return (
-    <Table className="rounded-md border">
+    <Table className="border rounded-lg">
       <TableHeader>
         {table.getHeaderGroups().map(headerGroup => (
           <TableRow key={headerGroup.id}>
