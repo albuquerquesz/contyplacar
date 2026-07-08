@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import VoteSection from '@/components/scoreboard/VoteSection'
-import HistoryList from '@/components/scoreboard/HistoryList'
+import ScoreboardClient from './ScoreboardClient'
 
 export default async function MatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -86,39 +85,15 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
   const player2Total = totals[match.player2.id] || 0
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-2xl px-4 py-8 sm:py-10">
-        <div className="mt-6">
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <div className="rounded-2xl border border-gray-200 bg-white h-50 p-4 text-center shadow-sm">
-              <p className="mb-1 text-sm text-gray-500">{match.player1.name}</p>
-              <p className="text-3xl font-bold text-blue-600">{player1Total}</p>
-            </div>
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 text-center shadow-sm">
-              <p className="mb-1 text-sm text-gray-500">{match.player2.name}</p>
-              <p className="text-3xl font-bold text-blue-600">{player2Total}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className='mt-8'>
-          <VoteSection
-            matchId={id}
-            currentScore={userScore?.score ?? null}
-            updatedAt={userScore?.updated_at ?? null}
-          />
-        </div>
-
-
-        <div className="mt-8">
-          <h2 className="mb-4 text-lg font-semibold text-gray-800">Histórico</h2>
-          <HistoryList
-            history={history.slice(0, 10)}
-            player1Name={match.player1.name}
-            player2Name={match.player2.name}
-          />
-        </div>
-      </div>
-    </div>
+    <ScoreboardClient
+      matchId={id}
+      player1={match.player1}
+      player2={match.player2}
+      initialPlayer1Total={player1Total}
+      initialPlayer2Total={player2Total}
+      userScore={userScore?.score ?? null}
+      userUpdatedAt={userScore?.updated_at ?? null}
+      history={history}
+    />
   )
 }

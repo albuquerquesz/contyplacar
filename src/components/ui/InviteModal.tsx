@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import confetti from 'canvas-confetti'
+import { Copy, Check } from 'lucide-react'
+import { Button } from './Button'
 
 interface InviteModalProps {
   open: boolean
@@ -58,12 +60,19 @@ export default function InviteModal({ open, link, onClose }: InviteModalProps) {
           />
         </div>
 
-        <button
-          onClick={handleCopy}
-          className="w-full rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
-        >
-          {copied ? '✓ Copiado!' : 'Copiar link'}
-        </button>
+        <Button variant="primary" fullWidth onClick={handleCopy}>
+          {copied ? (
+            <>
+              <Check className="h-5 w-5" />
+              Copiado!
+            </>
+          ) : (
+            <>
+              <Copy className="h-5 w-5" />
+              Copiar link
+            </>
+          )}
+        </Button>
       </div>
     </div>
   )

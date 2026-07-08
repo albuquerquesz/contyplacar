@@ -1,10 +1,13 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import MatchList from '@/components/dashboard/MatchList'
 import InviteModal from '@/components/ui/InviteModal'
+import { Button } from '@/components/ui/Button'
+import { LogOut, Plus } from 'lucide-react'
 
 type Player = {
   id: string
@@ -116,12 +119,14 @@ export default function DashboardPage() {
       <header className="border-b border-gray-200">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-6 pb-5">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 overflow-hidden rounded-full bg-gray-200 ring-1 ring-gray-300">
+            <div className="relative h-12 w-12 overflow-hidden rounded-full bg-gray-200 ring-1 ring-gray-300">
               {avatarUrl ? (
-                <img
+                <Image
                   src={avatarUrl}
                   alt={userName}
-                  className="h-full w-full object-cover"
+                  fill
+                  unoptimized
+                  className="object-cover"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-gray-100 text-sm font-semibold text-gray-600">
@@ -131,42 +136,30 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <button
-            onClick={handleSignOut}
-            className="group relative inline-flex items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
-            aria-label="Sair"
-          >
-            <span className="pointer-events-none absolute -inset-2 rounded-2xl bg-white/35 opacity-0 blur-xl transition-opacity duration-200 group-hover:opacity-100" />
-            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10 17l5-5-5-5" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H3" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 3v18" />
-            </svg>
-          </button>
+          <Button variant="ghost" onClick={handleSignOut} aria-label="Sair">
+            <LogOut className="h-5 w-5" />
+          </Button>
         </div>
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">
-                Suas Disputas
-              </h2>
-            </div>
-            <button
-              onClick={generateInviteLink}
-              disabled={generating}
-              className="inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-5 py-2.5 text-white font-semibold hover:bg-blue-700 transition-colors shadow-sm flex-shrink-0 disabled:opacity-50 text-sm"
-            >
-              <span className="text-lg leading-none">+</span>
-              Convidar amigo
-            </button>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Suas Disputas</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Veja suas disputas ativas e convide alguém quando quiser começar outra.
+            </p>
           </div>
+          <Button variant="primary" onClick={generateInviteLink} disabled={generating}>
+            <Plus className="h-5 w-5" />
+            Convidar
+          </Button>
+        </div>
 
-          {matches.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-dashed border-gray-200 shadow-sm p-12 text-center mt-4">
-              <div className="flex justify-center mb-4">
+        {matches.length === 0 ? (
+          <section className="border-t border-gray-200 pt-8">
+            <div className="mx-auto max-w-md text-center">
+              <div className="flex justify-center">
                 <div className="w-24 h-24 relative">
                   <svg viewBox="0 0 100 100" className="w-full h-full">
                     <defs>
@@ -191,25 +184,23 @@ export default function DashboardPage() {
                   </svg>
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Nenhuma disputa ainda</h3>
-              <p className="text-gray-500 mb-6 max-w-sm mx-auto">
-                Parece que você ainda não tem disputas. Convide um amigo e comece a primeira!
+              <h3 className="mt-5 text-2xl font-semibold tracking-tight text-gray-900">
+                Nenhuma disputa ainda
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-gray-500">
+                Parece que você ainda não tem disputas. Convide um amigo e comece a primeira.
               </p>
-              <button
-                onClick={generateInviteLink}
-                disabled={generating}
-                className="inline-flex items-center gap-2 rounded-2xl border-2 border-blue-600 px-6 py-2.5 text-blue-600 font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50"
-              >
-                <span className="text-lg leading-none">+</span>
+              <Button variant="outline" onClick={generateInviteLink} disabled={generating}>
+                <Plus className="h-5 w-5" />
                 Convidar amigo
-              </button>
+              </Button>
             </div>
-          ) : (
-            <div className="mt-4">
-              <MatchList matches={matches} />
-            </div>
-          )}
-        </div>
+          </section>
+        ) : (
+          <div className="border-t border-gray-200 pt-6">
+            <MatchList matches={matches} />
+          </div>
+        )}
       </div>
 
       {inviteLink && (

@@ -10,6 +10,13 @@ export async function GET(request: Request) {
   const code = requestUrl.searchParams.get('code')
   const next = getSafeInternalPath(requestUrl.searchParams.get('next'))
 
+  console.log('[auth/callback]', {
+    href: requestUrl.href,
+    origin: requestUrl.origin,
+    next,
+    hasCode: !!code,
+  })
+
   if (!code) {
     return NextResponse.redirect(new URL('/login?error=auth_failed', requestUrl.origin))
   }

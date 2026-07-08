@@ -2,7 +2,7 @@ type GoogleIconProps = {
   className?: string
 }
 
-export default function GoogleIcon({ className = 'w-6 h-6' }: GoogleIconProps) {
+export default function GoogleIcon({ className = 'w-5 h-5' }: GoogleIconProps) {
   return (
     <svg className={className} viewBox="0 0 48 48">
       <path

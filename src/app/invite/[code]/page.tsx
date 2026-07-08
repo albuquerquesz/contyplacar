@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import { AcceptButton } from '@/components/invite/AcceptButton'
 
 async function acceptInvitationAction(formData: FormData) {
   'use server'
@@ -114,12 +115,7 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
           <p className="text-gray-500 mb-8">
             Você vai criar uma disputa com {(invitation.sender as { name?: string } | null)?.name ?? 'este amigo'}.
           </p>
-          <button
-            type="submit"
-            className="w-full rounded-2xl bg-blue-600 px-8 py-3 text-white font-semibold hover:bg-blue-700 transition-colors"
-          >
-            Aceitar Disputa
-          </button>
+          <AcceptButton />
         </div>
       </form>
     </div>

@@ -5,21 +5,23 @@ import { getSafeInternalPath } from '@/lib/redirect'
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useState } from 'react'
 import GoogleIcon from '@/components/ui/GoogleIcon'
+import { Button } from '@/components/ui/Button'
 
 function LoginPageInner() {
   const [loading, setLoading] = useState(false)
   const searchParams = useSearchParams()
   const next = getSafeInternalPath(searchParams.get('next'))
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+  const redirectUrl = `${baseUrl}/auth/callback?next=${encodeURIComponent(next)}`
 
   async function signIn() {
     setLoading(true)
     const supabase = createClient()
-    const callbackUrl = new URL('/auth/callback', window.location.origin)
-    callbackUrl.searchParams.set('next', next)
+    console.log('[auth] login redirect:', { baseUrl, redirectUrl, next })
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: callbackUrl.toString(),
+        redirectTo: redirectUrl,
       },
     })
 
@@ -36,21 +38,21 @@ function LoginPageInner() {
         <p className="text-lg text-gray-500 mb-12">
           Registre a pontuação da disputa, acompanhe o placar e veja o histórico em um só lugar.
         </p>
-        <button
-          onClick={signIn}
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-3 rounded-2xl bg-blue-600 px-8 py-3 text-white font-semibold hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50"
-        >
-          {loading ? (
-            <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-          ) : (
-            <GoogleIcon />
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-left text-xs text-gray-600">
+            <p className="font-semibold text-gray-700">Auth debug</p>
+            <p className="mt-1 break-all">baseUrl: {baseUrl || 'n/a'}</p>
+            <p className="mt-1 break-all">redirectUrl: {redirectUrl || 'n/a'}</p>
+          </div>
+        )}
+        <Button onClick={signIn} disabled={loading} fullWidth loading={loading}>
+          {loading ? 'Conectando...' : (
+            <>
+              <GoogleIcon />
+              Entrar com Google
+            </>
           )}
-          {loading ? 'Conectando...' : 'Entrar com Google'}
-        </button>
+        </Button>
       </div>
     </div>
   )

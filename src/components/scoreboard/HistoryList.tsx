@@ -9,15 +9,17 @@ export default function HistoryList({
 }) {
   if (history.length === 0) {
     return (
-      <div className="rounded-2xl border border-gray-200 bg-white px-6 py-8 text-center shadow-sm">
+      <div className="border-t border-gray-200 pt-6 text-center">
         <p className="font-medium text-gray-700">Nenhum resultado ainda.</p>
-        <p className="mt-1 text-sm text-gray-400">Os dois participantes precisam registrar a pontuação para fechar uma rodada.</p>
+        <p className="mt-1 text-sm text-gray-500">
+          Os dois participantes precisam registrar a pontuação para fechar uma rodada.
+        </p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-3">
+    <div className="border-t border-gray-200">
       {history.map((entry) => {
         const winner =
           entry.player1Score > entry.player2Score
@@ -43,19 +45,17 @@ export default function HistoryList({
         return (
           <div
             key={entry.date}
-            className="rounded-2xl border border-gray-200 bg-white px-4 py-4 shadow-sm"
+            className="flex items-center justify-between gap-4 border-b border-gray-200 py-4 last:border-b-0"
           >
-            <div className="flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-600">{dateStr}</p>
-                <p className="mt-1 text-lg font-semibold tracking-tight text-gray-900">
-                  {entry.player1Score} <span className="text-gray-300">—</span> {entry.player2Score}
-                </p>
-              </div>
-              <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${winnerStyles}`}>
-                {winner}
-              </span>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-gray-500">{dateStr}</p>
+              <p className="mt-1 text-lg font-semibold tracking-tight text-gray-900">
+                {entry.player1Score} <span className="text-gray-300">—</span> {entry.player2Score}
+              </p>
             </div>
+            <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${winnerStyles}`}>
+              {winner}
+            </span>
           </div>
         )
       })}

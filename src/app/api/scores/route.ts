@@ -3,6 +3,40 @@ import { NextResponse } from 'next/server'
 
 const EDIT_WINDOW_MS = 60 * 1000
 
+export async function GET(request: Request) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { searchParams } = new URL(request.url)
+  const matchId = searchParams.get('matchId')
+
+  if (!matchId) {
+    return NextResponse.json({ error: 'Missing matchId' }, { status: 400 })
+  }
+
+  // Check if user is part of the match
+  const { data: match } = await supabase
+    .from('matches')
+    .select('player1_id, player2_id')
+    .eq('id', matchId)
+    .single()
+
+  if (!match || (match.player1_id !== user.id && match.player2_id !== user.id)) {
+    return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
+  }
+
+  const { data: scores } = await supabase
+    .from('scores')
+    .select('player_id, score')
+    .eq('match_id', matchId)
+
+  return NextResponse.json(scores ?? [])
+}
+
 export async function POST(request: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

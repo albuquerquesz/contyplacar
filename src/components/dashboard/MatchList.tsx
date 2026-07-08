@@ -18,32 +18,32 @@ type Match = {
 export default function MatchList({ matches }: { matches: Match[] }) {
   if (matches.length === 0) {
     return (
-      <div className="text-center py-12 bg-white rounded-2xl border border-gray-200 shadow-sm">
-        <p className="text-gray-500">Nenhum placar de disputa ainda.</p>
-        <p className="text-sm text-gray-400 mt-1">Convide um amigo para começar!</p>
+      <div className="py-8 text-center">
+        <p className="text-base font-medium text-gray-700">Nenhum placar de disputa ainda.</p>
+        <p className="mt-1 text-sm text-gray-500">Convide um amigo para começar.</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-3">
+    <div className="divide-y divide-gray-200">
       {matches.map((match) => (
         <Link
           key={match.id}
           href={`/match/${match.id}`}
-          className="block bg-white rounded-2xl border border-gray-200 p-4 shadow-sm hover:border-blue-300 transition-colors"
+          className="group flex items-center justify-between gap-4 py-4 transition-colors hover:bg-gray-50/80"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-semibold text-gray-900">
-                {match.player1.name} vs {match.player2.name}
-              </p>
-              <p className="text-sm text-gray-500">
-                {match.status === 'active' ? 'Ativa' : match.status}
-              </p>
-            </div>
-            <span className="text-gray-400">→</span>
+          <div className="min-w-0">
+            <p className="truncate text-base font-semibold text-gray-900">
+              {match.player1.name} vs {match.player2.name}
+            </p>
+            <p className="mt-1 text-sm text-gray-500">
+              {match.status === 'active' ? 'Ativa' : match.status}
+            </p>
           </div>
+          <span className="shrink-0 text-gray-300 transition-transform group-hover:translate-x-0.5 group-hover:text-gray-500">
+            →
+          </span>
         </Link>
       ))}
     </div>
