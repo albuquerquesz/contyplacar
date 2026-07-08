@@ -1,16 +1,30 @@
 'use client'
 
 import type { ColumnDef } from '@tanstack/react-table'
+import dayjs from 'dayjs'
+import 'dayjs/locale/pt-br'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import { ArrowUpDown } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/Button'
 import type { HistoryEntry } from '@/components/scoreboard/types'
 
+dayjs.extend(relativeTime)
+dayjs.locale('pt-br')
+
 function formatRecordedAt(recordedAt: string) {
-  return new Intl.DateTimeFormat('pt-BR', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(recordedAt))
+  const d = dayjs(recordedAt)
+  const today = dayjs().startOf('day')
+  const isToday = d.isSame(today, 'day')
+  const isYesterday = d.isSame(today.subtract(1, 'day'), 'day')
+
+  if (isToday) {
+    return `Hoje às ${d.format('HH[h]mm')}`
+  }
+  if (isYesterday) {
+    return `Ontem às ${d.format('HH[h]mm')}`
+  }
+  return d.format('DD/MM/YYYY')
 }
 
 function getInitials(name: string) {

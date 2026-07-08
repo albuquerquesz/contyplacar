@@ -30,12 +30,12 @@ export default function DashboardPage() {
   const router = useRouter()
   const [matches, setMatches] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
-  const [inviteLink, setInviteLink] = useState<string | null>(null)
   const [generating, setGenerating] = useState(false)
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
   const [userName, setUserName] = useState('Usuário')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [userId, setUserId] = useState('')
+  const [inviteLink, setInviteLink] = useState<string | null>(null)
 
   useEffect(() => {
     let active = true
@@ -86,26 +86,51 @@ export default function DashboardPage() {
     router.replace('/login')
   }
 
-  const generateInviteLink = async () => {
-    setGenerating(true)
-    const linkCode = crypto.randomUUID()
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? window.location.origin
+  const openInviteModal = () => {
+    setInviteLink(null)
+    setInviteModalOpen(true)
+  }
 
-    try {
-      const res = await fetch('/api/invitations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ linkCode }),
-      })
+  const handleInviteCopy = async ({
+    senderInitialScore,
+    opponentInitialScore,
+  }: {
+    senderInitialScore: number
+    opponentInitialScore: number
+  }) => {
+    let nextLink = inviteLink
 
-      if (res.ok) {
-        setInviteLink(`${baseUrl}/invite/${linkCode}`)
-        setInviteModalOpen(true)
+    const score = (v: number) => (typeof v === 'number' && Number.isFinite(v) ? Math.round(v) : 0)
+    const senderScore = score(senderInitialScore)
+    const opponentScore = score(opponentInitialScore)
+
+    if (!nextLink) {
+      setGenerating(true)
+      const linkCode = crypto.randomUUID()
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? window.location.origin
+
+      try {
+        const res = await fetch('/api/invitations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ linkCode, senderInitialScore: senderScore, opponentInitialScore: opponentScore }),
+        })
+
+        if (!res.ok) {
+          throw new Error('Failed to create invitation')
+        }
+
+        nextLink = `${baseUrl}/invite/${linkCode}`
+        setInviteLink(nextLink)
+      } catch (err) {
+        console.error('Failed to generate invite link:', err)
+        throw err
+      } finally {
+        setGenerating(false)
       }
-    } catch (err) {
-      console.error('Failed to generate invite link:', err)
     }
-    setGenerating(false)
+
+    await navigator.clipboard.writeText(nextLink)
   }
 
   if (loading) {
@@ -155,7 +180,7 @@ export default function DashboardPage() {
               Veja suas disputas ativas e convide alguém quando quiser começar outra.
             </p>
           </div>
-          <Button variant="primary" onClick={generateInviteLink} disabled={generating}>
+          <Button variant="primary" onClick={openInviteModal} disabled={generating}>
             <Plus className="h-5 w-5" />
             Convidar
           </Button>
@@ -195,7 +220,7 @@ export default function DashboardPage() {
               <p className="mt-2 text-sm leading-6 text-gray-500">
                 Parece que você ainda não tem disputas. Convide um amigo e comece a primeira.
               </p>
-              <Button className="mt-6" variant="outline" onClick={generateInviteLink} disabled={generating}>
+              <Button className="mt-6" variant="outline" onClick={openInviteModal} disabled={generating}>
                 <Plus className="h-5 w-5" />
                 Convidar
               </Button>
@@ -208,13 +233,11 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {inviteLink && (
-        <InviteModal
-          open={inviteModalOpen}
-          link={inviteLink}
-          onClose={() => setInviteModalOpen(false)}
-        />
-      )}
+      <InviteModal
+        open={inviteModalOpen}
+        onCopy={handleInviteCopy}
+        onClose={() => setInviteModalOpen(false)}
+      />
     </div>
   )
 }

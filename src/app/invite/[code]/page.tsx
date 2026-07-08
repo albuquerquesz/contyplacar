@@ -3,6 +3,12 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { AcceptButton } from '@/components/invite/AcceptButton'
 
+function getPreviousDateString() {
+  const previousDate = new Date()
+  previousDate.setDate(previousDate.getDate() - 1)
+  return previousDate.toISOString().split('T')[0]
+}
+
 async function acceptInvitationAction(formData: FormData) {
   'use server'
 
@@ -23,7 +29,7 @@ async function acceptInvitationAction(formData: FormData) {
   const admin = createAdminClient()
   const { data: invitation, error: invitationError } = await admin
     .from('invitations')
-    .select('id, sender_id, expires_at, status')
+    .select('id, sender_id, expires_at, status, sender_initial_score, opponent_initial_score')
     .eq('link_code', code)
     .eq('status', 'pending')
     .single()
@@ -48,6 +54,29 @@ async function acceptInvitationAction(formData: FormData) {
     .single()
 
   if (matchError || !match) {
+    return redirect(`/invite/${code}`)
+  }
+
+  const initialScoreDate = getPreviousDateString()
+  const { error: scoresError } = await admin
+    .from('scores')
+    .insert([
+      {
+        match_id: match.id,
+        player_id: invitation.sender_id,
+        score: invitation.sender_initial_score,
+        date: initialScoreDate,
+      },
+      {
+        match_id: match.id,
+        player_id: user.id,
+        score: invitation.opponent_initial_score,
+        date: initialScoreDate,
+      },
+    ])
+
+  if (scoresError) {
+    await admin.from('matches').delete().eq('id', match.id)
     return redirect(`/invite/${code}`)
   }
 
@@ -77,7 +106,7 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
   const admin = createAdminClient()
   const { data: invitation } = await admin
     .from('invitations')
-    .select('id, sender_id, expires_at, sender:sender_id(id, name, email)')
+    .select('id, sender_id, expires_at, sender_initial_score, opponent_initial_score, sender:sender_id(id, name, email)')
     .eq('link_code', code)
     .eq('status', 'pending')
     .single()

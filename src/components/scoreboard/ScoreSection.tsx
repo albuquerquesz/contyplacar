@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, Undo2, Check } from 'lucide-react'
+import { Plus, Undo2, Check } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 
 const EDIT_WINDOW_MS = 60 * 1000
@@ -59,11 +59,11 @@ export default function ScoreSection({
         <div className="flex justify-center">
           <Button
             variant="primary"
-            className="min-w-[200px] bg-green-600 hover:bg-green-700"
+            className="w-[340px] bg-green-600 hover:bg-green-700"
             disabled
           >
             <Check className="h-5 w-5" />
-            Pontuação registrada
+            Pontuou
           </Button>
         </div>
       </div>
@@ -76,8 +76,8 @@ export default function ScoreSection({
     <div className="border-t border-gray-200 pt-6">
       <div className="flex justify-center">
         <Button
-          variant={isUndo ? 'outline' : 'primary'}
-          className="min-w-[200px]"
+          variant="primary"
+          className={`w-[340px] ${isUndo ? 'bg-red-600 hover:bg-red-700' : ''}`}
           onClick={handleToggle}
           disabled={loading}
         >
@@ -88,7 +88,7 @@ export default function ScoreSection({
             </>
           ) : (
             <>
-              <Save className="h-5 w-5" />
+              <Plus className="h-5 w-5" />
               Pontuar
             </>
           )}

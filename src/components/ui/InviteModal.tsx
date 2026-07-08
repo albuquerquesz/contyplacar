@@ -7,16 +7,45 @@ import { Button } from './Button'
 
 interface InviteModalProps {
   open: boolean
-  link: string
+  onCopy: (values: { senderInitialScore: number; opponentInitialScore: number }) => Promise<void>
   onClose: () => void
 }
 
-export default function InviteModal({ open, link, onClose }: InviteModalProps) {
+const MIN_SCORE = 0
+const MAX_SCORE = 999
+
+function sanitizeScore(value: string) {
+  const parsed = Number.parseInt(value, 10)
+
+  if (Number.isNaN(parsed)) {
+    return MIN_SCORE
+  }
+
+  return Math.min(MAX_SCORE, Math.max(MIN_SCORE, parsed))
+}
+
+export default function InviteModal({ open, onCopy, onClose }: InviteModalProps) {
   const [copied, setCopied] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [senderInitialScore, setSenderInitialScore] = useState(0)
+  const [opponentInitialScore, setOpponentInitialScore] = useState(0)
+
   const handleClose = useCallback(() => {
     setCopied(false)
+    setLoading(false)
+    setSenderInitialScore(0)
+    setOpponentInitialScore(0)
     onClose()
   }, [onClose])
+
+  useEffect(() => {
+    if (open) {
+      setCopied(false)
+      setLoading(false)
+      setSenderInitialScore(0)
+      setOpponentInitialScore(0)
+    }
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -30,14 +59,19 @@ export default function InviteModal({ open, link, onClose }: InviteModalProps) {
   }, [open, handleClose])
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(link)
-    setCopied(true)
-    confetti({
-      particleCount: 120,
-      spread: 90,
-      origin: { y: 0.6 },
-      colors: ['#3b82f6', '#60a5fa', '#93c5fd', '#f59e0b', '#10b981'],
-    })
+    try {
+      setLoading(true)
+      await onCopy({ senderInitialScore, opponentInitialScore })
+      setCopied(true)
+      confetti({
+        particleCount: 120,
+        spread: 90,
+        origin: { y: 0.6 },
+        colors: ['#3b82f6', '#60a5fa', '#93c5fd', '#f59e0b', '#10b981'],
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (!open) return null
@@ -46,21 +80,44 @@ export default function InviteModal({ open, link, onClose }: InviteModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={handleClose} />
       <div className="relative bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
-        <h3 className="text-xl font-bold text-gray-900 mb-1">Link de convite</h3>
+        <h3 className="text-xl font-bold text-gray-900 mb-1">Convide um amigo</h3>
         <p className="text-sm text-gray-500 mb-6">
-          Compartilhe este link com seu amigo para começar a registrar a pontuação da disputa!
+          Defina os valores iniciais e envie o convite para começar a disputa com um amigo.
         </p>
 
-        <div className="flex items-center gap-2 mb-6">
-          <input
-            type="text"
-            value={link}
-            readOnly
-            className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-600 font-mono"
-          />
+        <div className="space-y-4 mb-6">
+          <div>
+            <label htmlFor="sender-initial-score" className="mb-2 block text-sm font-medium text-gray-700">
+              Seu valor inicial
+            </label>
+            <input
+              id="sender-initial-score"
+              type="number"
+              min={MIN_SCORE}
+              max={MAX_SCORE}
+              value={senderInitialScore}
+              onChange={(event) => setSenderInitialScore(sanitizeScore(event.target.value))}
+              className="w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700 [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="opponent-initial-score" className="mb-2 block text-sm font-medium text-gray-700">
+              Valor inicial do oponente
+            </label>
+            <input
+              id="opponent-initial-score"
+              type="number"
+              min={MIN_SCORE}
+              max={MAX_SCORE}
+              value={opponentInitialScore}
+              onChange={(event) => setOpponentInitialScore(sanitizeScore(event.target.value))}
+              className="w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700 [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            />
+          </div>
         </div>
 
-        <Button variant="primary" fullWidth onClick={handleCopy}>
+        <Button variant="primary" fullWidth onClick={handleCopy} disabled={loading}>
           {copied ? (
             <>
               <Check className="h-5 w-5" />
@@ -69,7 +126,7 @@ export default function InviteModal({ open, link, onClose }: InviteModalProps) {
           ) : (
             <>
               <Copy className="h-4 w-4" />
-              Copiar
+              {loading ? 'Gerando...' : 'Copiar'}
             </>
           )}
         </Button>
