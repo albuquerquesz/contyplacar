@@ -11,13 +11,12 @@ function LoginPageInner() {
   const [loading, setLoading] = useState(false)
   const searchParams = useSearchParams()
   const next = getSafeInternalPath(searchParams.get('next'))
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-  const redirectUrl = `${baseUrl}/auth/callback?next=${encodeURIComponent(next)}`
 
   async function signIn() {
     setLoading(true)
     const supabase = createClient()
-    console.log('[auth] login redirect:', { baseUrl, redirectUrl, next })
+    const baseUrl = window.location.origin
+    const redirectUrl = `${baseUrl}/auth/callback?next=${encodeURIComponent(next)}`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -35,16 +34,6 @@ function LoginPageInner() {
     <div className="min-h-screen flex flex-col items-center justify-center px-4">
       <div className="text-center max-w-md w-full">
         <h1 className="text-4xl font-bold text-gray-900 mb-2">Seja bem vindo!</h1>
-        <p className="text-lg text-gray-500 mb-12">
-          Registre a pontuação da disputa, acompanhe o placar e veja o histórico em um só lugar.
-        </p>
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-left text-xs text-gray-600">
-            <p className="font-semibold text-gray-700">Auth debug</p>
-            <p className="mt-1 break-all">baseUrl: {baseUrl || 'n/a'}</p>
-            <p className="mt-1 break-all">redirectUrl: {redirectUrl || 'n/a'}</p>
-          </div>
-        )}
         <Button onClick={signIn} disabled={loading} fullWidth loading={loading}>
           {loading ? 'Conectando...' : (
             <>

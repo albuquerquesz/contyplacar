@@ -68,8 +68,8 @@ export default function InviteModal({ open, link, onClose }: InviteModalProps) {
             </>
           ) : (
             <>
-              <Copy className="h-5 w-5" />
-              Copiar link
+              <Copy className="h-4 w-4" />
+              Copiar
             </>
           )}
         </Button>

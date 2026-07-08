@@ -73,17 +73,6 @@ export default function ScoreSection({
 
   return (
     <div className="border-t border-gray-200 pt-6">
-      <div className="mb-4">
-        <h3 className="text-base font-semibold tracking-tight text-gray-900">
-          {hasSubmitted ? 'Pontuação salva' : 'Registrar pontuação'}
-        </h3>
-        <p className="mt-1 text-sm text-gray-500">
-          {hasSubmitted
-            ? 'Você pode corrigir a pontuação por até 1 minuto após salvar.'
-            : 'Registre a pontuação de hoje. Se errar, você pode corrigir por até 1 minuto.'}
-        </p>
-      </div>
-
       <div className="flex flex-col gap-3 sm:flex-row">
         <input
           type="number"
@@ -91,8 +80,8 @@ export default function ScoreSection({
           max={999}
           value={score}
           onChange={e => setScore(e.target.value)}
-          className="h-12 w-full rounded-xl border border-gray-300 bg-white px-4 text-lg text-gray-900 outline-none transition-shadow focus:border-blue-500 focus:ring-4 focus:ring-blue-100 sm:flex-1"
-          placeholder="0-999"
+          className="h-12 w-full rounded-xl border border-gray-300 bg-white px-4 text-lg text-gray-900 outline-none transition-shadow [-moz-appearance:textfield] focus:border-blue-500 focus:ring-4 focus:ring-blue-100 sm:flex-1 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          placeholder="0"
         />
         <button
           onClick={handleSubmit}
@@ -107,12 +96,12 @@ export default function ScoreSection({
           ) : hasSubmitted ? (
             <>
               <RefreshCw className="h-5 w-5" />
-              Atualizar pontuação
+              Atualizar
             </>
           ) : (
             <>
               <Save className="h-5 w-5" />
-              Salvar pontuação
+              Salvar
             </>
           )}
         </button>

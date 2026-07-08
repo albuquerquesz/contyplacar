@@ -157,10 +157,10 @@ export default function DashboardPage() {
         </div>
 
         {matches.length === 0 ? (
-          <section className="border-t border-gray-200 pt-8">
+          <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center mt-4">
             <div className="mx-auto max-w-md text-center">
               <div className="flex justify-center">
-                <div className="w-24 h-24 relative">
+                <div className="relative h-32 w-32">
                   <svg viewBox="0 0 100 100" className="w-full h-full">
                     <defs>
                       <linearGradient id="trophyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -184,15 +184,15 @@ export default function DashboardPage() {
                   </svg>
                 </div>
               </div>
-              <h3 className="mt-5 text-2xl font-semibold tracking-tight text-gray-900">
+              <h3 className="mt-3 text-2xl font-semibold tracking-tight text-gray-900">
                 Nenhuma disputa ainda
               </h3>
               <p className="mt-2 text-sm leading-6 text-gray-500">
                 Parece que você ainda não tem disputas. Convide um amigo e comece a primeira.
               </p>
-              <Button variant="outline" onClick={generateInviteLink} disabled={generating}>
+              <Button className="mt-6" variant="outline" onClick={generateInviteLink} disabled={generating}>
                 <Plus className="h-5 w-5" />
-                Convidar amigo
+                Convidar
               </Button>
             </div>
           </section>

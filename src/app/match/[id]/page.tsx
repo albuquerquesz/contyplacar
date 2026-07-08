@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import type { HistoryEntry } from '@/components/scoreboard/types'
 import ScoreboardClient from './ScoreboardClient'
 
 export default async function MatchPage({ params }: { params: Promise<{ id: string }> }) {
@@ -55,31 +56,30 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
 
   const { data: allScores } = await supabase
     .from('scores')
-    .select('player_id, score, date')
+    .select('player_id, score, updated_at, date')
     .eq('match_id', id)
-    .order('date', { ascending: false })
+    .order('updated_at', { ascending: false })
 
-  const history: Array<{
-    date: string
-    player1Score: number
-    player2Score: number
-  }> = []
-
-  const scoresByDate: Record<string, Record<string, number>> = {}
-  allScores?.forEach(s => {
-    if (!scoresByDate[s.date]) scoresByDate[s.date] = {}
-    scoresByDate[s.date][s.player_id] = s.score
-  })
-
-  for (const [date, players] of Object.entries(scoresByDate)) {
-    if (match.player1.id in players && match.player2.id in players) {
-      history.push({
-        date,
-        player1Score: players[match.player1.id],
-        player2Score: players[match.player2.id],
-      })
-    }
+  const playerById = {
+    [match.player1.id]: {
+      name: match.player1.name,
+      avatarUrl: match.player1.avatar_url,
+    },
+    [match.player2.id]: {
+      name: match.player2.name,
+      avatarUrl: match.player2.avatar_url,
+    },
   }
+
+  const history: HistoryEntry[] = (allScores ?? [])
+    .filter(score => Boolean(score.updated_at) && score.player_id in playerById)
+    .map(score => ({
+      id: `${score.date}-${score.player_id}-${score.updated_at}`,
+      playerName: playerById[score.player_id].name,
+      playerAvatarUrl: playerById[score.player_id].avatarUrl,
+      score: score.score,
+      recordedAt: score.updated_at ?? '',
+    }))
 
   const player1Total = totals[match.player1.id] || 0
   const player2Total = totals[match.player2.id] || 0

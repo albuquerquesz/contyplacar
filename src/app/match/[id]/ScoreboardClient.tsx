@@ -1,10 +1,22 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import ScoreSection from '@/components/scoreboard/ScoreSection'
 import HistoryList from '@/components/scoreboard/HistoryList'
+import type { HistoryEntry } from '@/components/scoreboard/types'
 
 type Player = { id: string; name: string; email: string; avatar_url: string | null }
+
+function getInitials(name: string) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map(part => part[0])
+    .join('')
+    .toUpperCase()
+}
 
 export default function ScoreboardClient({
   matchId,
@@ -23,7 +35,7 @@ export default function ScoreboardClient({
   initialPlayer2Total: number
   userScore: number | null
   userUpdatedAt: string | null
-  history: Array<{ date: string; player1Score: number; player2Score: number }>
+  history: HistoryEntry[]
 }) {
   const [player1Total, setPlayer1Total] = useState(initialPlayer1Total)
   const [player2Total, setPlayer2Total] = useState(initialPlayer2Total)
@@ -48,17 +60,24 @@ export default function ScoreboardClient({
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:py-10">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.16em] text-gray-500">
-            Placar do dia
-          </p>
-          <div className="mt-4 grid grid-cols-2 gap-6 border-t border-gray-200 pt-6 sm:gap-8">
-            <div className="pr-4">
-              <p className="text-sm text-gray-500">{player1.name}</p>
-              <p className="mt-2 text-4xl font-semibold tracking-tight text-gray-900">{player1Total}</p>
+          <div className="mt-4 grid grid-cols-2 gap-6 border-t border-gray-200 pt-8 sm:gap-8">
+            <div className="flex flex-col items-center text-center">
+              <Avatar className="size-14">
+                <AvatarImage src={player1.avatar_url ?? undefined} alt={player1.name} />
+                <AvatarFallback>{getInitials(player1.name)}</AvatarFallback>
+              </Avatar>
+              <p className="mt-4 text-5xl font-semibold tracking-tight text-gray-900">
+                {player1Total}
+              </p>
             </div>
-            <div className="border-l border-gray-200 pl-4">
-              <p className="text-sm text-gray-500">{player2.name}</p>
-              <p className="mt-2 text-4xl font-semibold tracking-tight text-gray-900">{player2Total}</p>
+            <div className="flex flex-col items-center text-center border-l border-gray-200 pl-4">
+              <Avatar className="size-14">
+                <AvatarImage src={player2.avatar_url ?? undefined} alt={player2.name} />
+                <AvatarFallback>{getInitials(player2.name)}</AvatarFallback>
+              </Avatar>
+              <p className="mt-4 text-5xl font-semibold tracking-tight text-gray-900">
+                {player2Total}
+              </p>
             </div>
           </div>
         </div>
@@ -73,14 +92,7 @@ export default function ScoreboardClient({
         </div>
 
         <div className="mt-8">
-          <h2 className="text-sm font-medium uppercase tracking-[0.16em] text-gray-500">
-            Histórico
-          </h2>
-          <HistoryList
-            history={history.slice(0, 10)}
-            player1Name={player1.name}
-            player2Name={player2.name}
-          />
+          <HistoryList history={history} />
         </div>
       </div>
     </div>
