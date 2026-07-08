@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, RefreshCw } from 'lucide-react'
+import { Save, Undo2, Check } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 
 const EDIT_WINDOW_MS = 60 * 1000
 
@@ -16,9 +17,8 @@ export default function ScoreSection({
   updatedAt: string | null
   onSaved?: (score: number) => void
 }) {
-  const [score, setScore] = useState(currentScore?.toString() ?? '')
-  const [savedAt, setSavedAt] = useState(updatedAt)
   const [hasSubmitted, setHasSubmitted] = useState(currentScore !== null)
+  const [savedAt, setSavedAt] = useState(updatedAt)
   const [loading, setLoading] = useState(false)
   const [now, setNow] = useState(() => Date.now())
 
@@ -36,79 +36,67 @@ export default function ScoreSection({
     return () => clearInterval(interval)
   }, [])
 
-  async function handleSubmit() {
-    const num = parseInt(score)
-    if (isNaN(num) || num < 0 || num > 999) return
-
+  async function handleToggle() {
+    const score = hasSubmitted && isWithinEditWindow ? 0 : 1
     setLoading(true)
     const res = await fetch('/api/scores', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ matchId, score: num }),
+      body: JSON.stringify({ matchId, score }),
     })
     setLoading(false)
 
     if (res.ok) {
       setSavedAt(new Date().toISOString())
       setHasSubmitted(true)
-      onSaved?.(num)
+      onSaved?.(score)
     }
   }
 
   if (hasWindowExpired) {
     return (
       <div className="border-t border-gray-200 pt-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-700">
-            ✓
-          </div>
-          <div className="min-w-0">
-            <p className="font-semibold text-gray-900">Pontuação registrada</p>
-            <p className="text-sm text-gray-500">Volte amanhã para registrar outra pontuação.</p>
-          </div>
+        <div className="flex justify-center">
+          <Button
+            variant="primary"
+            className="min-w-[200px] bg-green-600 hover:bg-green-700"
+            disabled
+          >
+            <Check className="h-5 w-5" />
+            Pontuação registrada
+          </Button>
         </div>
       </div>
     )
   }
 
+  const isUndo = hasSubmitted && isWithinEditWindow
+
   return (
     <div className="border-t border-gray-200 pt-6">
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <input
-          type="number"
-          min={0}
-          max={999}
-          value={score}
-          onChange={e => setScore(e.target.value)}
-          className="h-12 w-full rounded-xl border border-gray-300 bg-white px-4 text-lg text-gray-900 outline-none transition-shadow [-moz-appearance:textfield] focus:border-blue-500 focus:ring-4 focus:ring-blue-100 sm:flex-1 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-          placeholder="0"
-        />
-        <button
-          onClick={handleSubmit}
-          disabled={loading || score === ''}
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+      <div className="flex justify-center">
+        <Button
+          variant={isUndo ? 'outline' : 'primary'}
+          className="min-w-[200px]"
+          onClick={handleToggle}
+          disabled={loading}
         >
-          {loading ? (
+          {isUndo ? (
             <>
-              <RefreshCw className="h-5 w-5 animate-spin" />
-              Salvando...
-            </>
-          ) : hasSubmitted ? (
-            <>
-              <RefreshCw className="h-5 w-5" />
-              Atualizar
+              <Undo2 className="h-5 w-5" />
+              Desfazer
             </>
           ) : (
             <>
               <Save className="h-5 w-5" />
-              Salvar
+              Pontuar
             </>
           )}
-        </button>
+        </Button>
       </div>
       {timeLeft && (
-        <p className="mt-3 text-sm font-medium text-orange-600">
-          <span className="font-mono">⏱ {timeLeft}</span> para corrigir
+        <p className="mt-3 text-center text-sm font-medium text-orange-600">
+          <span className="font-mono">⏱ {timeLeft}</span> para desfazer
         </p>
       )}
     </div>

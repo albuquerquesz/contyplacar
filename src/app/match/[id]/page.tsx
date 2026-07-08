@@ -33,6 +33,13 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
     return redirect('/dashboard')
   }
 
+  // Check if user has left
+  const isPlayer1 = match.player1.id === user.id
+  const userLeft = isPlayer1 ? match.player1_left : match.player2_left
+  if (userLeft) {
+    return redirect('/dashboard')
+  }
+
   const today = new Date().toISOString().split('T')[0]
 
   // Fetch today's scores

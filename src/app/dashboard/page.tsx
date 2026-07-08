@@ -20,6 +20,8 @@ type Match = {
   player1_id: string
   player2_id: string
   status: string
+  player1_left: boolean
+  player2_left: boolean
   player1: Player
   player2: Player
 }
@@ -33,6 +35,7 @@ export default function DashboardPage() {
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
   const [userName, setUserName] = useState('Usuário')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [userId, setUserId] = useState('')
 
   useEffect(() => {
     let active = true
@@ -51,6 +54,7 @@ export default function DashboardPage() {
       }
 
       const metadata = user.user_metadata ?? {}
+      setUserId(user.id)
       setUserName(metadata.name ?? user.email?.split('@')[0] ?? 'Usuário')
       setAvatarUrl(metadata.avatar_url ?? null)
 
@@ -58,6 +62,7 @@ export default function DashboardPage() {
         .from('matches')
         .select('*, player1:profiles(player1_id, name, avatar_url), player2:profiles(player2_id, name, avatar_url)')
         .or(`player1_id.eq.${user.id},player2_id.eq.${user.id}`)
+        .neq('status', 'completed')
         .order('created_at', { ascending: false })
 
       if (!active) return
@@ -198,7 +203,7 @@ export default function DashboardPage() {
           </section>
         ) : (
           <div className="border-t border-gray-200 pt-6">
-            <MatchList matches={matches} />
+            <MatchList matches={matches} currentUserId={userId} />
           </div>
         )}
       </div>

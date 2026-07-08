@@ -38,7 +38,7 @@ export default function HistoryList({ history }: { history: HistoryEntry[] }) {
   })
 
   return (
-    <Table className="border rounded-lg">
+    <Table className="border border-gray-200 rounded-lg overflow-hidden min-h-[320px]">
       <TableHeader>
         {table.getHeaderGroups().map(headerGroup => (
           <TableRow key={headerGroup.id}>
@@ -61,16 +61,16 @@ export default function HistoryList({ history }: { history: HistoryEntry[] }) {
       <TableBody>
         {table.getRowModel().rows.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={3} className="py-10 text-center">
-              <p className="font-medium text-foreground">Nenhum resultado ainda.</p>
-              <p className="mt-1 text-sm text-muted-foreground">
+            <TableCell colSpan={3} className="py-20 text-center">
+              <p className="text-lg font-medium text-foreground">Nenhum resultado ainda.</p>
+              <p className="mt-1 text-base text-gray-500">
                 Os dois participantes precisam registrar a pontuação para fechar uma rodada.
               </p>
             </TableCell>
           </TableRow>
         ) : (
           table.getRowModel().rows.map(row => (
-            <TableRow key={row.id}>
+            <TableRow key={row.id} className="border-b border-gray-100">
               {row.getVisibleCells().map(cell => (
                 <TableCell
                   key={cell.id}
