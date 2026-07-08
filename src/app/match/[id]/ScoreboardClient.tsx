@@ -84,9 +84,16 @@ export default function ScoreboardClient({
   const [player2Total, setPlayer2Total] = useState(initialPlayer2Total)
   const [showLeaveModal, setShowLeaveModal] = useState(false)
 
+  useEffect(() => {
+    setPlayer1Total(initialPlayer1Total)
+    setPlayer2Total(initialPlayer2Total)
+  }, [initialPlayer1Total, initialPlayer2Total])
+
   const handleScoreSaved = useCallback(async (_score?: number) => {
     try {
-      const res = await fetch(`/api/scores?matchId=${matchId}`)
+      const res = await fetch(`/api/scores?matchId=${matchId}`, {
+        cache: 'no-store',
+      })
       if (!res.ok) return
       const data = await res.json()
       const newTotals: Record<string, number> = {}
