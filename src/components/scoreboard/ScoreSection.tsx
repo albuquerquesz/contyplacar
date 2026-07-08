@@ -47,6 +47,13 @@ export default function ScoreSection({
     setLoading(false)
 
     if (res.ok) {
+      if (score === 0) {
+        setSavedAt(null)
+        setHasSubmitted(false)
+        onSaved?.(score)
+        return
+      }
+
       setSavedAt(new Date().toISOString())
       setHasSubmitted(true)
       onSaved?.(score)

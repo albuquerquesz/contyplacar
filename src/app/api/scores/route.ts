@@ -67,7 +67,7 @@ export async function POST(request: Request) {
   // Check if already submitted today and still within the correction window.
   const { data: existing } = await supabase
     .from('scores')
-    .select('updated_at')
+    .select('id, updated_at')
     .eq('match_id', matchId)
     .eq('player_id', user.id)
     .eq('date', today)
@@ -78,6 +78,29 @@ export async function POST(request: Request) {
     if (elapsed >= EDIT_WINDOW_MS) {
       return NextResponse.json({ error: 'Edit window expired' }, { status: 403 })
     }
+  }
+
+  if (score === 0) {
+    if (!existing) {
+      return NextResponse.json({ ok: true })
+    }
+
+    const { error } = await supabase
+      .from('scores')
+      .delete()
+      .eq('id', existing.id)
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    await supabase.from('score_events').insert({
+      match_id: matchId,
+      player_id: user.id,
+      action: 'undid',
+    })
+
+    return NextResponse.json({ ok: true })
   }
 
   // Upsert score
@@ -99,6 +122,13 @@ export async function POST(request: Request) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
+
+  // Record event
+  await supabase.from('score_events').insert({
+    match_id: matchId,
+    player_id: user.id,
+    action: 'scored',
+  })
 
   return NextResponse.json({ ok: true })
 }

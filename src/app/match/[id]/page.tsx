@@ -3,6 +3,13 @@ import { redirect } from 'next/navigation'
 import type { HistoryEntry } from '@/components/scoreboard/types'
 import ScoreboardClient from './ScoreboardClient'
 
+type ScoreEvent = {
+  id: string
+  action: 'scored' | 'undid'
+  created_at: string
+  player: { id: string; name: string; avatar_url: string | null }
+}
+
 export default async function MatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
@@ -88,6 +95,27 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
       recordedAt: score.updated_at ?? '',
     }))
 
+  // Fetch score events for timeline
+  const { data: events } = await supabase
+    .from('score_events')
+    .select(`
+      id,
+      action,
+      created_at,
+      player:player_id(id, name, email, avatar_url)
+    `)
+    .eq('match_id', id)
+    .order('created_at', { ascending: true })
+
+  const scoreEvents: ScoreEvent[] = (events ?? [])
+    .filter(e => Array.isArray(e.player) && e.player.length > 0)
+    .map(e => ({
+      id: e.id,
+      action: e.action as 'scored' | 'undid',
+      created_at: e.created_at,
+      player: e.player[0] as { id: string; name: string; avatar_url: string | null },
+    }))
+
   const player1Total = totals[match.player1.id] || 0
   const player2Total = totals[match.player2.id] || 0
 
@@ -101,6 +129,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
       userScore={userScore?.score ?? null}
       userUpdatedAt={userScore?.updated_at ?? null}
       history={history}
+      scoreEvents={scoreEvents}
     />
   )
 }

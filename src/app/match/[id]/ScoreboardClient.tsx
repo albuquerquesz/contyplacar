@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, startTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import ScoreSection from '@/components/scoreboard/ScoreSection'
@@ -67,6 +67,7 @@ export default function ScoreboardClient({
   userScore,
   userUpdatedAt,
   history,
+  scoreEvents,
 }: {
   matchId: string
   player1: Player
@@ -76,13 +77,14 @@ export default function ScoreboardClient({
   userScore: number | null
   userUpdatedAt: string | null
   history: HistoryEntry[]
+  scoreEvents: { id: string; action: 'scored' | 'undid'; created_at: string; player: { id: string; name: string; avatar_url: string | null } }[]
 }) {
   const router = useRouter()
   const [player1Total, setPlayer1Total] = useState(initialPlayer1Total)
   const [player2Total, setPlayer2Total] = useState(initialPlayer2Total)
   const [showLeaveModal, setShowLeaveModal] = useState(false)
 
-  const handleScoreSaved = useCallback(async () => {
+  const handleScoreSaved = useCallback(async (_score?: number) => {
     try {
       const res = await fetch(`/api/scores?matchId=${matchId}`)
       if (!res.ok) return
@@ -93,10 +95,13 @@ export default function ScoreboardClient({
       })
       setPlayer1Total(newTotals[player1.id] ?? 0)
       setPlayer2Total(newTotals[player2.id] ?? 0)
+      startTransition(() => {
+        router.refresh()
+      })
     } catch {
       // Keep current totals on error
     }
-  }, [matchId, player1.id, player2.id])
+  }, [matchId, player1.id, player2.id, router])
 
   const handleLeave = async () => {
     try {
@@ -158,7 +163,7 @@ export default function ScoreboardClient({
         </div>
 
         <div className="mt-8">
-          <HistoryList history={history} />
+          <HistoryList history={history} scoreEvents={scoreEvents} />
         </div>
       </div>
 
