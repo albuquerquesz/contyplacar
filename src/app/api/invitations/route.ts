@@ -14,12 +14,14 @@ export async function POST(request: Request) {
   }
 
   const { linkCode, senderInitialScore, opponentInitialScore } = await request.json()
+  const normalizedSenderInitialScore = senderInitialScore ?? 0
+  const normalizedOpponentInitialScore = opponentInitialScore ?? 0
 
   if (!linkCode) {
     return NextResponse.json({ error: 'Missing linkCode' }, { status: 400 })
   }
 
-  if (!isValidInitialScore(senderInitialScore) || !isValidInitialScore(opponentInitialScore)) {
+  if (!isValidInitialScore(normalizedSenderInitialScore) || !isValidInitialScore(normalizedOpponentInitialScore)) {
     return NextResponse.json({ error: 'Invalid initial scores' }, { status: 400 })
   }
 
@@ -36,8 +38,8 @@ export async function POST(request: Request) {
   const { error } = await supabase.from('invitations').insert({
     sender_id: user.id,
     link_code: linkCode,
-    sender_initial_score: senderInitialScore,
-    opponent_initial_score: opponentInitialScore,
+    sender_initial_score: normalizedSenderInitialScore,
+    opponent_initial_score: normalizedOpponentInitialScore,
     status: 'pending',
     expires_at: expiresAt,
   })

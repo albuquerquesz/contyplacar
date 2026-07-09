@@ -227,12 +227,12 @@ export default function DashboardPage() {
     senderInitialScore,
     opponentInitialScore,
   }: {
-    senderInitialScore: number
-    opponentInitialScore: number
+    senderInitialScore?: number
+    opponentInitialScore?: number
   }) => {
     let nextLink = inviteLink
 
-    const score = (v: number) => (typeof v === 'number' && Number.isFinite(v) ? Math.round(v) : 0)
+    const score = (v?: number) => (typeof v === 'number' && Number.isFinite(v) ? Math.round(v) : 0)
     const senderScore = score(senderInitialScore)
     const opponentScore = score(opponentInitialScore)
 

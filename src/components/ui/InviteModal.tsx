@@ -7,18 +7,36 @@ import { Button } from './Button'
 
 interface InviteModalProps {
   open: boolean
-  onCopy: (values: { senderInitialScore: number; opponentInitialScore: number }) => Promise<void>
+  onCopy: (values: { senderInitialScore?: number; opponentInitialScore?: number }) => Promise<void>
   onClose: () => void
 }
 
 const MIN_SCORE = 0
 const MAX_SCORE = 999
 
-function sanitizeScore(value: string) {
+function sanitizeScoreInput(value: string) {
+  if (value === '') {
+    return ''
+  }
+
   const parsed = Number.parseInt(value, 10)
 
   if (Number.isNaN(parsed)) {
-    return MIN_SCORE
+    return ''
+  }
+
+  return String(Math.min(MAX_SCORE, Math.max(MIN_SCORE, parsed)))
+}
+
+function parseScore(value: string) {
+  if (value === '') {
+    return undefined
+  }
+
+  const parsed = Number.parseInt(value, 10)
+
+  if (Number.isNaN(parsed)) {
+    return undefined
   }
 
   return Math.min(MAX_SCORE, Math.max(MIN_SCORE, parsed))
@@ -27,14 +45,14 @@ function sanitizeScore(value: string) {
 export default function InviteModal({ open, onCopy, onClose }: InviteModalProps) {
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [senderInitialScore, setSenderInitialScore] = useState(0)
-  const [opponentInitialScore, setOpponentInitialScore] = useState(0)
+  const [senderInitialScore, setSenderInitialScore] = useState('')
+  const [opponentInitialScore, setOpponentInitialScore] = useState('')
 
   const handleClose = useCallback(() => {
     setCopied(false)
     setLoading(false)
-    setSenderInitialScore(0)
-    setOpponentInitialScore(0)
+    setSenderInitialScore('')
+    setOpponentInitialScore('')
     onClose()
   }, [onClose])
 
@@ -42,8 +60,8 @@ export default function InviteModal({ open, onCopy, onClose }: InviteModalProps)
     if (open) {
       setCopied(false)
       setLoading(false)
-      setSenderInitialScore(0)
-      setOpponentInitialScore(0)
+      setSenderInitialScore('')
+      setOpponentInitialScore('')
     }
   }, [open])
 
@@ -61,7 +79,10 @@ export default function InviteModal({ open, onCopy, onClose }: InviteModalProps)
   const handleCopy = async () => {
     try {
       setLoading(true)
-      await onCopy({ senderInitialScore, opponentInitialScore })
+      await onCopy({
+        senderInitialScore: parseScore(senderInitialScore),
+        opponentInitialScore: parseScore(opponentInitialScore),
+      })
       setCopied(true)
       confetti({
         particleCount: 120,
@@ -96,7 +117,8 @@ export default function InviteModal({ open, onCopy, onClose }: InviteModalProps)
               min={MIN_SCORE}
               max={MAX_SCORE}
               value={senderInitialScore}
-              onChange={(event) => setSenderInitialScore(sanitizeScore(event.target.value))}
+              placeholder="0"
+              onChange={(event) => setSenderInitialScore(sanitizeScoreInput(event.target.value))}
               className="w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700 [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
           </div>
@@ -111,7 +133,8 @@ export default function InviteModal({ open, onCopy, onClose }: InviteModalProps)
               min={MIN_SCORE}
               max={MAX_SCORE}
               value={opponentInitialScore}
-              onChange={(event) => setOpponentInitialScore(sanitizeScore(event.target.value))}
+              placeholder="0"
+              onChange={(event) => setOpponentInitialScore(sanitizeScoreInput(event.target.value))}
               className="w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-700 [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
           </div>
