@@ -50,6 +50,8 @@ export default function DashboardPage() {
   const [userName, setUserName] = useState('Usuário')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [userId, setUserId] = useState('')
+  const prevMatchIdsRef = useRef<Set<string>>(new Set())
+  const [newMatchIds, setNewMatchIds] = useState<Set<string>>(new Set())
   const [inviteLink, setInviteLink] = useState<string | null>(null)
   const isMountedRef = useRef(true)
 
@@ -193,6 +195,18 @@ export default function DashboardPage() {
       void supabase.removeChannel(channel)
     }
   }, [userId])
+
+  useEffect(() => {
+    const currentIds = new Set(matches.map((m) => m.id))
+    const added = new Set(
+      [...currentIds].filter((id) => !prevMatchIdsRef.current.has(id))
+    )
+    if (added.size > 0) {
+      setNewMatchIds(added)
+      setTimeout(() => setNewMatchIds(new Set()), 1200)
+    }
+    prevMatchIdsRef.current = currentIds
+  }, [matches])
 
   const handleRetryMatches = async () => {
     await loadMatches({ retry: true })
@@ -375,7 +389,7 @@ export default function DashboardPage() {
           </section>
         ) : (
           <div className="pt-6">
-            <MatchList matches={matches} currentUserId={userId} />
+            <MatchList matches={matches} currentUserId={userId} newMatchIds={newMatchIds} />
           </div>
         )}
       </div>

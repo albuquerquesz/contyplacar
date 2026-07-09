@@ -43,7 +43,7 @@ function getInitials(name: string) {
     .toUpperCase()
 }
 
-export default function MatchList({ matches, currentUserId }: { matches: Match[]; currentUserId: string }) {
+export default function MatchList({ matches, currentUserId, newMatchIds }: { matches: Match[]; currentUserId: string; newMatchIds: Set<string> }) {
   const router = useRouter()
   const [pageIndex, setPageIndex] = useState(0)
 
@@ -97,7 +97,7 @@ export default function MatchList({ matches, currentUserId }: { matches: Match[]
                     event.preventDefault()
                     openMatch(match.id)
                   }}
-                  className="group cursor-pointer border-gray-200 transition-all hover:bg-blue-50/70 focus-visible:bg-blue-50/70"
+                  className={`group cursor-pointer border-gray-200 transition-all hover:bg-blue-50/70 focus-visible:bg-blue-50/70${newMatchIds.has(match.id) ? ' animate-row-slide-in' : ''}`}
                 >
                   <TableCell>
                     <div className="flex items-center gap-3">
