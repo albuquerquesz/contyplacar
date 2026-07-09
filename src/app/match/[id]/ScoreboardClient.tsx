@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useEffect, startTransition, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import ScoreSection from '@/components/scoreboard/ScoreSection'
 import HistoryList from '@/components/scoreboard/HistoryList'
@@ -94,79 +93,40 @@ export default function ScoreboardClient({
     setScoreEventsState(scoreEvents)
   }, [initialPlayer1Total, initialPlayer2Total, scoreEvents])
 
-  // Subscribe to score_events changes for live updates
+  // Poll for score updates (realtime subscription only works after migration is applied)
   useEffect(() => {
-    const supabase = createClient()
+    const interval = setInterval(async () => {
+      if (realtimeRefetching.current) return
+      realtimeRefetching.current = true
 
-    const channel = supabase
-      .channel(`match-events-${matchId}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'score_events', filter: `match_id=eq.${matchId}` },
-        async () => {
-          if (realtimeRefetching.current) return
-          realtimeRefetching.current = true
+      try {
+        const [scoresRes, eventsRes] = await Promise.all([
+          fetch(`/api/scores?matchId=${matchId}`, { cache: 'no-store' }),
+          fetch(`/api/score-events?matchId=${matchId}`, { cache: 'no-store' }),
+        ])
 
-          try {
-            const scoresRes = await fetch(`/api/scores?matchId=${matchId}`, { cache: 'no-store' })
-            if (scoresRes.ok) {
-              const data = await scoresRes.json()
-              const newTotals: Record<string, number> = {}
-              data.forEach((s: { player_id: string; score: number }) => {
-                newTotals[s.player_id] = (newTotals[s.player_id] || 0) + s.score
-              })
-              setPlayer1Total(newTotals[player1.id] ?? 0)
-              setPlayer2Total(newTotals[player2.id] ?? 0)
-            }
-
-            const eventsRes = await fetch(`/api/score-events?matchId=${matchId}`, { cache: 'no-store' })
-            if (eventsRes.ok) {
-              const events = await eventsRes.json()
-              setScoreEventsState(events)
-            }
-          } finally {
-            setTimeout(() => { realtimeRefetching.current = false }, 1000)
-          }
+        if (scoresRes.ok) {
+          const data = await scoresRes.json()
+          const newTotals: Record<string, number> = {}
+          data.forEach((s: { player_id: string; score: number }) => {
+            newTotals[s.player_id] = (newTotals[s.player_id] || 0) + s.score
+          })
+          setPlayer1Total(newTotals[player1.id] ?? 0)
+          setPlayer2Total(newTotals[player2.id] ?? 0)
         }
-      )
-      .subscribe()
 
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [matchId, player1.id, player2.id])
-
-  // Fallback: refetch when tab becomes visible (in case realtime missed events)
-  useEffect(() => {
-    const handleVisibility = async () => {
-      if (document.visibilityState === 'visible' && !realtimeRefetching.current) {
-        realtimeRefetching.current = true
-        try {
-          const scoresRes = await fetch(`/api/scores?matchId=${matchId}`, { cache: 'no-store' })
-          if (scoresRes.ok) {
-            const data = await scoresRes.json()
-            const newTotals: Record<string, number> = {}
-            data.forEach((s: { player_id: string; score: number }) => {
-              newTotals[s.player_id] = (newTotals[s.player_id] || 0) + s.score
-            })
-            setPlayer1Total(newTotals[player1.id] ?? 0)
-            setPlayer2Total(newTotals[player2.id] ?? 0)
-          }
-
-          const eventsRes = await fetch(`/api/score-events?matchId=${matchId}`, { cache: 'no-store' })
-          if (eventsRes.ok) {
-            const events = await eventsRes.json()
-            setScoreEventsState(events)
-          }
-        } finally {
-          setTimeout(() => { realtimeRefetching.current = false }, 1000)
+        if (eventsRes.ok) {
+          const events = await eventsRes.json()
+          setScoreEventsState(events)
         }
+      } finally {
+        realtimeRefetching.current = false
       }
-    }
+    }, 5000)
 
-    document.addEventListener('visibilitychange', handleVisibility)
-    return () => document.removeEventListener('visibilitychange', handleVisibility)
+    return () => clearInterval(interval)
   }, [matchId, player1.id, player2.id])
+
 
   const handleScoreSaved = useCallback(async () => {
     realtimeRefetching.current = true
