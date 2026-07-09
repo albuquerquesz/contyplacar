@@ -1,4 +1,18 @@
-import Link from 'next/link'
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { ChevronRight } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/Button'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 type Player = {
   id: string
@@ -17,43 +31,123 @@ type Match = {
   player2: Player
 }
 
+const PAGE_SIZE = 10
+
+function getInitials(name: string) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+}
+
 export default function MatchList({ matches, currentUserId }: { matches: Match[]; currentUserId: string }) {
-  if (matches.length === 0) {
-    return (
-      <div className="py-8 text-center">
-        <p className="text-base font-medium text-gray-700">Nenhum placar de disputa ainda.</p>
-        <p className="mt-1 text-sm text-gray-500">Convide um amigo para começar.</p>
-      </div>
-    )
+  const router = useRouter()
+  const [pageIndex, setPageIndex] = useState(0)
+
+  const totalPages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE))
+
+  useEffect(() => {
+    setPageIndex((current) => Math.min(current, totalPages - 1))
+  }, [totalPages])
+
+  const paginatedMatches = useMemo(() => {
+    const start = pageIndex * PAGE_SIZE
+    return matches.slice(start, start + PAGE_SIZE)
+  }, [matches, pageIndex])
+
+  const rangeStart = matches.length === 0 ? 0 : pageIndex * PAGE_SIZE + 1
+  const rangeEnd = Math.min((pageIndex + 1) * PAGE_SIZE, matches.length)
+
+  const openMatch = (matchId: string) => {
+    router.push(`/match/${matchId}`)
   }
 
   return (
-    <div className="divide-y divide-gray-200">
-      {matches.map((match) => {
-        const isPlayer1 = match.player1_id === currentUserId
-        const userLeft = isPlayer1 ? match.player1_left : match.player2_left
-        const statusLabel = userLeft ? 'Você saiu' : match.status === 'active' ? 'Ativa' : match.status
+    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+      <Table>
+        <TableHeader className="bg-gray-50">
+          <TableRow className="hover:bg-gray-50">
+            <TableHead>Oponente</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Ação</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {paginatedMatches.map((match) => {
+            const isPlayer1 = match.player1_id === currentUserId
+            const opponent = isPlayer1 ? match.player2 : match.player1
+            const userLeft = isPlayer1 ? match.player1_left : match.player2_left
+            const statusLabel = userLeft ? 'Você saiu' : match.status === 'active' ? 'Ativa' : match.status
 
-        return (
-          <Link
-            key={match.id}
-            href={`/match/${match.id}`}
-            className="group flex items-center justify-between gap-4 py-4 transition-colors hover:bg-gray-50/80"
+            return (
+              <TableRow
+                key={match.id}
+                role="link"
+                tabIndex={0}
+                onClick={() => openMatch(match.id)}
+                onKeyDown={(event) => {
+                  if (event.key !== 'Enter' && event.key !== ' ') {
+                    return
+                  }
+
+                  event.preventDefault()
+                  openMatch(match.id)
+                }}
+                className="group cursor-pointer border-gray-200 transition-all hover:bg-blue-50/70 focus-visible:bg-blue-50/70"
+              >
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="size-10 ring-1 ring-gray-200">
+                      <AvatarImage src={opponent.avatar_url ?? undefined} alt={opponent.name} />
+                      <AvatarFallback>{getInitials(opponent.name)}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-gray-900">{opponent.name}</p>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                    {statusLabel}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right">
+                  <span className="inline-flex items-center text-gray-300 transition-colors group-hover:text-gray-500">
+                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </TableCell>
+              </TableRow>
+            )
+          })}
+        </TableBody>
+      </Table>
+
+      <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-4 py-3">
+        <p className="text-sm text-gray-500">
+          {rangeStart}-{rangeEnd} de {matches.length}
+        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPageIndex((current) => Math.max(0, current - 1))}
+            disabled={pageIndex === 0}
           >
-            <div className="min-w-0">
-              <p className="truncate text-base font-semibold text-gray-900">
-                {match.player1.name} vs {match.player2.name}
-              </p>
-              <p className="mt-1 text-sm text-gray-500">
-                {statusLabel}
-              </p>
-            </div>
-            <span className="shrink-0 text-gray-300 transition-transform group-hover:translate-x-0.5 group-hover:text-gray-500">
-              →
-            </span>
-          </Link>
-        )
-      })}
+            Anterior
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPageIndex((current) => Math.min(totalPages - 1, current + 1))}
+            disabled={pageIndex >= totalPages - 1}
+          >
+            Próxima
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }
