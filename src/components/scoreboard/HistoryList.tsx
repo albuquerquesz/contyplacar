@@ -51,7 +51,7 @@ export default function HistoryList({
   scoreEvents: ScoreEvent[]
 }) {
   return (
-    <div className="min-h-[320px]">
+    <div className="min-h-[420px]">
       {scoreEvents.length === 0 ? (
         <div className="flex min-h-[240px] items-center justify-center rounded-lg border border-gray-200 bg-white">
           <div className="max-w-sm text-center">
@@ -62,7 +62,7 @@ export default function HistoryList({
           </div>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <div className="h-[420px] overflow-hidden rounded-lg border border-gray-200 bg-white">
           <Table className="overflow-hidden">
             <TableHeader className="bg-white">
             <TableRow className="hover:bg-white">
