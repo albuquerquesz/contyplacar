@@ -135,6 +135,38 @@ export default function ScoreboardClient({
     }
   }, [matchId, player1.id, player2.id])
 
+  // Fallback: refetch when tab becomes visible (in case realtime missed events)
+  useEffect(() => {
+    const handleVisibility = async () => {
+      if (document.visibilityState === 'visible' && !realtimeRefetching.current) {
+        realtimeRefetching.current = true
+        try {
+          const scoresRes = await fetch(`/api/scores?matchId=${matchId}`, { cache: 'no-store' })
+          if (scoresRes.ok) {
+            const data = await scoresRes.json()
+            const newTotals: Record<string, number> = {}
+            data.forEach((s: { player_id: string; score: number }) => {
+              newTotals[s.player_id] = (newTotals[s.player_id] || 0) + s.score
+            })
+            setPlayer1Total(newTotals[player1.id] ?? 0)
+            setPlayer2Total(newTotals[player2.id] ?? 0)
+          }
+
+          const eventsRes = await fetch(`/api/score-events?matchId=${matchId}`, { cache: 'no-store' })
+          if (eventsRes.ok) {
+            const events = await eventsRes.json()
+            setScoreEventsState(events)
+          }
+        } finally {
+          setTimeout(() => { realtimeRefetching.current = false }, 1000)
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [matchId, player1.id, player2.id])
+
   const handleScoreSaved = useCallback(async () => {
     realtimeRefetching.current = true
     setTimeout(() => { realtimeRefetching.current = false }, 1500)
@@ -212,7 +244,6 @@ export default function ScoreboardClient({
           <ScoreSection
             matchId={matchId}
             currentScore={userScore}
-            updatedAt={userUpdatedAt}
             onSaved={handleScoreSaved}
           />
         </div>

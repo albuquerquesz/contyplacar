@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/Button'
@@ -82,23 +83,10 @@ export default function MatchList({ matches, currentUserId, newMatchIds }: { mat
               const opponent = isPlayer1 ? match.player2 : match.player1
               const userLeft = isPlayer1 ? match.player1_left : match.player2_left
               const statusLabel = userLeft ? 'Você saiu' : match.status === 'active' ? 'Ativa' : match.status
+              const isNew = newMatchIds.has(match.id)
 
-              return (
-                <TableRow
-                  key={match.id}
-                  role="link"
-                  tabIndex={0}
-                  onClick={() => openMatch(match.id)}
-                  onKeyDown={(event) => {
-                    if (event.key !== 'Enter' && event.key !== ' ') {
-                      return
-                    }
-
-                    event.preventDefault()
-                    openMatch(match.id)
-                  }}
-                  className={`group cursor-pointer border-gray-200 transition-all hover:bg-blue-50/70 focus-visible:bg-blue-50/70${newMatchIds.has(match.id) ? ' animate-row-slide-in' : ''}`}
-                >
+              const rowContent = (
+                <>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="size-10 ring-1 ring-gray-200">
@@ -120,8 +108,39 @@ export default function MatchList({ matches, currentUserId, newMatchIds }: { mat
                       <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </span>
                   </TableCell>
-                </TableRow>
+                </>
               )
+
+              const rowProps = {
+                key: match.id,
+                role: 'link' as const,
+                tabIndex: 0,
+                onClick: () => openMatch(match.id),
+                onKeyDown: (event: React.KeyboardEvent) => {
+                  if (event.key !== 'Enter' && event.key !== ' ') {
+                    return
+                  }
+                  event.preventDefault()
+                  openMatch(match.id)
+                },
+                className: 'group cursor-pointer border-gray-200 transition-colors hover:bg-blue-50/70 focus-visible:bg-blue-50/70',
+              }
+
+              if (isNew) {
+                return (
+                  <motion.tr
+                    {...rowProps}
+                    layout
+                    initial={{ opacity: 0, y: -24, backgroundColor: '#eff6ff' }}
+                    animate={{ opacity: 1, y: 0, backgroundColor: '#ffffff' }}
+                    transition={{ duration: 0.5, ease: 'easeOut' }}
+                  >
+                    {rowContent}
+                  </motion.tr>
+                )
+              }
+
+              return <TableRow {...rowProps}>{rowContent}</TableRow>
             })}
           </TableBody>
         </Table>
