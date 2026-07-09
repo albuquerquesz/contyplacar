@@ -38,10 +38,8 @@ function formatTime(created_at: string) {
 }
 
 export default function HistoryList({
-  history,
   scoreEvents,
 }: {
-  history: { id: string; playerName: string; playerAvatarUrl: string | null; score: number; recordedAt: string }[]
   scoreEvents: ScoreEvent[]
 }) {
   return (

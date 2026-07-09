@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import ScoreSection from '@/components/scoreboard/ScoreSection'
 import HistoryList from '@/components/scoreboard/HistoryList'
-import type { HistoryEntry } from '@/components/scoreboard/types'
 import { Button } from '@/components/ui/Button'
 import { LogOut } from 'lucide-react'
 
@@ -84,12 +83,13 @@ export default function ScoreboardClient({
   const [player2Total, setPlayer2Total] = useState(initialPlayer2Total)
   const [showLeaveModal, setShowLeaveModal] = useState(false)
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     setPlayer1Total(initialPlayer1Total)
     setPlayer2Total(initialPlayer2Total)
   }, [initialPlayer1Total, initialPlayer2Total])
 
-  const handleScoreSaved = useCallback(async (_score?: number) => {
+  const handleScoreSaved = useCallback(async () => {
     try {
       const res = await fetch(`/api/scores?matchId=${matchId}`, {
         cache: 'no-store',
@@ -170,7 +170,7 @@ export default function ScoreboardClient({
         </div>
 
         <div className="mt-8">
-          <HistoryList history={history} scoreEvents={scoreEvents} />
+          <HistoryList scoreEvents={scoreEvents} />
         </div>
       </div>
 

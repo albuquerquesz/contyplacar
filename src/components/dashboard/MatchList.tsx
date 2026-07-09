@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/Button'
 import {
@@ -66,88 +66,94 @@ export default function MatchList({ matches, currentUserId }: { matches: Match[]
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-      <Table>
-        <TableHeader className="bg-gray-50">
-          <TableRow className="hover:bg-gray-50">
-            <TableHead>Oponente</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Ação</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {paginatedMatches.map((match) => {
-            const isPlayer1 = match.player1_id === currentUserId
-            const opponent = isPlayer1 ? match.player2 : match.player1
-            const userLeft = isPlayer1 ? match.player1_left : match.player2_left
-            const statusLabel = userLeft ? 'Você saiu' : match.status === 'active' ? 'Ativa' : match.status
+    <>
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <Table>
+          <TableHeader className="bg-white">
+            <TableRow className="hover:bg-white">
+              <TableHead>Oponente</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Ação</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedMatches.map((match) => {
+              const isPlayer1 = match.player1_id === currentUserId
+              const opponent = isPlayer1 ? match.player2 : match.player1
+              const userLeft = isPlayer1 ? match.player1_left : match.player2_left
+              const statusLabel = userLeft ? 'Você saiu' : match.status === 'active' ? 'Ativa' : match.status
 
-            return (
-              <TableRow
-                key={match.id}
-                role="link"
-                tabIndex={0}
-                onClick={() => openMatch(match.id)}
-                onKeyDown={(event) => {
-                  if (event.key !== 'Enter' && event.key !== ' ') {
-                    return
-                  }
+              return (
+                <TableRow
+                  key={match.id}
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => openMatch(match.id)}
+                  onKeyDown={(event) => {
+                    if (event.key !== 'Enter' && event.key !== ' ') {
+                      return
+                    }
 
-                  event.preventDefault()
-                  openMatch(match.id)
-                }}
-                className="group cursor-pointer border-gray-200 transition-all hover:bg-blue-50/70 focus-visible:bg-blue-50/70"
-              >
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="size-10 ring-1 ring-gray-200">
-                      <AvatarImage src={opponent.avatar_url ?? undefined} alt={opponent.name} />
-                      <AvatarFallback>{getInitials(opponent.name)}</AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-gray-900">{opponent.name}</p>
+                    event.preventDefault()
+                    openMatch(match.id)
+                  }}
+                  className="group cursor-pointer border-gray-200 transition-all hover:bg-blue-50/70 focus-visible:bg-blue-50/70"
+                >
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="size-10 ring-1 ring-gray-200">
+                        <AvatarImage src={opponent.avatar_url ?? undefined} alt={opponent.name} />
+                        <AvatarFallback>{getInitials(opponent.name)}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-gray-900">{opponent.name}</p>
+                      </div>
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
-                    {statusLabel}
-                  </span>
-                </TableCell>
-                <TableCell className="text-right">
-                  <span className="inline-flex items-center text-gray-300 transition-colors group-hover:text-gray-500">
-                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </span>
-                </TableCell>
-              </TableRow>
-            )
-          })}
-        </TableBody>
-      </Table>
+                  </TableCell>
+                  <TableCell>
+                    <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                      {statusLabel}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <span className="inline-flex items-center text-gray-300 transition-colors group-hover:text-gray-500">
+                      <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+      </div>
 
-      <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-4 py-3">
+      <div className="flex items-center justify-between pl-4 pr-3 py-3">
         <p className="text-sm text-gray-500">
           {rangeStart}-{rangeEnd} de {matches.length}
         </p>
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={() => setPageIndex((current) => Math.max(0, current - 1))}
             disabled={pageIndex === 0}
+            aria-label="Página anterior"
+            className="size-8 rounded-full p-0"
           >
-            Anterior
+            <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={() => setPageIndex((current) => Math.min(totalPages - 1, current + 1))}
             disabled={pageIndex >= totalPages - 1}
+            aria-label="Próxima página"
+            className="size-8 rounded-full p-0"
           >
-            Próxima
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
-    </div>
+    </>
   )
 }

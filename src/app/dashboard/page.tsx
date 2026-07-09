@@ -215,10 +215,7 @@ export default function DashboardPage() {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Suas Disputas</h2>
-            <p className="mt-1 text-sm text-gray-500">
-              Veja suas disputas ativas e convide alguém quando quiser começar outra.
-            </p>
+            <h2 className="text-xl font-bold leading-none text-gray-900">Suas Disputas</h2>
           </div>
           <Button variant="primary" onClick={openInviteModal} disabled={generating}>
             <Plus className="h-5 w-5" />
@@ -299,7 +296,7 @@ export default function DashboardPage() {
             </div>
           </section>
         ) : (
-          <div className="border-t border-gray-200 pt-6">
+          <div className="pt-6">
             <MatchList matches={matches} currentUserId={userId} />
           </div>
         )}
