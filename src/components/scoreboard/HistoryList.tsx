@@ -5,6 +5,14 @@ import 'dayjs/locale/pt-br'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Check, Undo2 } from 'lucide-react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 
 dayjs.extend(relativeTime)
 dayjs.locale('pt-br')
@@ -43,14 +51,10 @@ export default function HistoryList({
   scoreEvents: ScoreEvent[]
 }) {
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden min-h-[320px]">
-      <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-        <p className="text-sm font-semibold text-gray-700">Acontecimentos</p>
-      </div>
-
+    <div className="min-h-[320px]">
       {scoreEvents.length === 0 ? (
-        <div className="flex items-center justify-center min-h-[240px]">
-          <div className="text-center">
+        <div className="flex min-h-[240px] items-center justify-center rounded-lg border border-gray-200 bg-white">
+          <div className="max-w-sm text-center">
             <p className="text-lg font-medium text-foreground">Nenhum resultado ainda.</p>
             <p className="mt-1 text-base text-gray-500">
               Os dois participantes precisam registrar a pontuação para fechar uma rodada.
@@ -58,36 +62,47 @@ export default function HistoryList({
           </div>
         </div>
       ) : (
-        <div className="divide-y divide-gray-100">
-          {scoreEvents.map((event) => (
-            <div
-              key={event.id}
-              className="flex items-center gap-3 px-4 py-3"
-            >
-              <Avatar className="size-8">
-                <AvatarImage src={event.player.avatar_url ?? undefined} alt={event.player.name} />
-                <AvatarFallback>{getInitials(event.player.name)}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  {event.action === 'scored' ? (
-                    <Check className="h-4 w-4 text-green-600 shrink-0" />
-                  ) : (
-                    <Undo2 className="h-4 w-4 text-orange-500 shrink-0" />
-                  )}
-                  <span className="text-sm font-medium text-gray-900 truncate">
-                    {event.player.name}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {event.action === 'scored' ? 'pontuou' : 'desfez'}
-                  </span>
-                </div>
-              </div>
-              <span className="text-sm text-gray-400 shrink-0">
-                {formatTime(event.created_at)}
-              </span>
-            </div>
-          ))}
+        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+          <Table className="overflow-hidden">
+            <TableHeader className="bg-white">
+            <TableRow className="hover:bg-white">
+              <TableHead>Participante</TableHead>
+              <TableHead className="w-24 text-center">Evento</TableHead>
+              <TableHead className="text-right">Registrado em</TableHead>
+            </TableRow>
+            </TableHeader>
+            <TableBody>
+              {scoreEvents.map((event) => (
+                <TableRow key={event.id} className="hover:bg-white">
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="size-8">
+                        <AvatarImage src={event.player.avatar_url ?? undefined} alt={event.player.name} />
+                        <AvatarFallback>{getInitials(event.player.name)}</AvatarFallback>
+                      </Avatar>
+                      <span className="truncate text-sm font-medium text-gray-900">
+                        {event.player.name}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {event.action === 'scored' ? (
+                      <span className="inline-flex size-8 items-center justify-center text-green-600">
+                        <Check className="h-4 w-4" />
+                      </span>
+                    ) : (
+                      <span className="inline-flex size-8 items-center justify-center text-orange-500">
+                        <Undo2 className="h-4 w-4" />
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right text-sm text-gray-400">
+                    {formatTime(event.created_at)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

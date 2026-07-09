@@ -10,6 +10,27 @@ type ScoreEvent = {
   player: { id: string; name: string; avatar_url: string | null }
 }
 
+type ScoreEventPlayer = {
+  id: string
+  name: string
+  avatar_url: string | null
+}
+
+type ScoreEventRow = {
+  id: string
+  action: 'scored' | 'undid'
+  created_at: string
+  player: ScoreEventPlayer | ScoreEventPlayer[] | null
+}
+
+function normalizeScoreEventPlayer(player: ScoreEventRow['player']) {
+  if (Array.isArray(player)) {
+    return player[0] ?? null
+  }
+
+  return player
+}
+
 export default async function MatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
@@ -107,13 +128,17 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
     .eq('match_id', id)
     .order('created_at', { ascending: true })
 
-  const scoreEvents: ScoreEvent[] = (events ?? [])
-    .filter(e => Array.isArray(e.player) && e.player.length > 0)
-    .map(e => ({
-      id: e.id,
-      action: e.action as 'scored' | 'undid',
-      created_at: e.created_at,
-      player: e.player[0] as { id: string; name: string; avatar_url: string | null },
+  const scoreEvents: ScoreEvent[] = ((events ?? []) as ScoreEventRow[])
+    .map((event) => ({
+      ...event,
+      player: normalizeScoreEventPlayer(event.player),
+    }))
+    .filter((event) => Boolean(event.player?.id && event.player?.name))
+    .map((event) => ({
+      id: event.id,
+      action: event.action,
+      created_at: event.created_at,
+      player: event.player as ScoreEventPlayer,
     }))
 
   const player1Total = totals[match.player1.id] || 0

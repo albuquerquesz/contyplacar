@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import ScoreSection from '@/components/scoreboard/ScoreSection'
 import HistoryList from '@/components/scoreboard/HistoryList'
+import type { HistoryEntry } from '@/components/scoreboard/types'
 import { Button } from '@/components/ui/Button'
 import { LogOut } from 'lucide-react'
 

@@ -1,6 +1,24 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
+type ScoreEventRow = {
+  id: string
+  action: 'scored' | 'undid'
+  created_at: string
+  player:
+    | { id: string; name: string; avatar_url: string | null }
+    | { id: string; name: string; avatar_url: string | null }[]
+    | null
+}
+
+function normalizeScoreEventPlayer(player: ScoreEventRow['player']) {
+  if (Array.isArray(player)) {
+    return player[0] ?? null
+  }
+
+  return player
+}
+
 export async function GET(request: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -27,5 +45,18 @@ export async function GET(request: Request) {
     .eq('match_id', matchId)
     .order('created_at', { ascending: true })
 
-  return NextResponse.json(events ?? [])
+  const normalizedEvents = ((events ?? []) as ScoreEventRow[])
+    .map((event) => ({
+      ...event,
+      player: normalizeScoreEventPlayer(event.player),
+    }))
+    .filter((event) => Boolean(event.player?.id && event.player?.name))
+    .map((event) => ({
+      id: event.id,
+      action: event.action,
+      created_at: event.created_at,
+      player: event.player,
+    }))
+
+  return NextResponse.json(normalizedEvents)
 }

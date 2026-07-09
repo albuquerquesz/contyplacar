@@ -94,11 +94,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    await supabase.from('score_events').insert({
+    const { error: eventError } = await supabase.from('score_events').insert({
       match_id: matchId,
       player_id: user.id,
       action: 'undid',
     })
+
+    if (eventError) {
+      console.error('Failed to record undo score event:', eventError)
+    }
 
     return NextResponse.json({ ok: true })
   }
@@ -124,11 +128,15 @@ export async function POST(request: Request) {
   }
 
   // Record event
-  await supabase.from('score_events').insert({
+  const { error: eventError } = await supabase.from('score_events').insert({
     match_id: matchId,
     player_id: user.id,
     action: 'scored',
   })
+
+  if (eventError) {
+    console.error('Failed to record score event:', eventError)
+  }
 
   return NextResponse.json({ ok: true })
 }
