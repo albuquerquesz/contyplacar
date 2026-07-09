@@ -38,7 +38,6 @@ export default function InviteModal({ open, onCopy, onClose }: InviteModalProps)
     onClose()
   }, [onClose])
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (open) {
       setCopied(false)

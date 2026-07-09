@@ -152,8 +152,6 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
       initialPlayer1Total={player1Total}
       initialPlayer2Total={player2Total}
       userScore={userScore?.score ?? null}
-      userUpdatedAt={userScore?.updated_at ?? null}
-      history={history}
       scoreEvents={scoreEvents}
     />
   )

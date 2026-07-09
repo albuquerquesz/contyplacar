@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import ScoreSection from '@/components/scoreboard/ScoreSection'
 import HistoryList from '@/components/scoreboard/HistoryList'
-import type { HistoryEntry } from '@/components/scoreboard/types'
 import { Button } from '@/components/ui/Button'
 import { LogOut } from 'lucide-react'
 
@@ -65,8 +64,6 @@ export default function ScoreboardClient({
   initialPlayer1Total,
   initialPlayer2Total,
   userScore,
-  userUpdatedAt,
-  history,
   scoreEvents,
 }: {
   matchId: string
@@ -75,8 +72,6 @@ export default function ScoreboardClient({
   initialPlayer1Total: number
   initialPlayer2Total: number
   userScore: number | null
-  userUpdatedAt: string | null
-  history: HistoryEntry[]
   scoreEvents: { id: string; action: 'scored' | 'undid'; created_at: string; player: { id: string; name: string; avatar_url: string | null } }[]
 }) {
   const router = useRouter()
@@ -86,7 +81,6 @@ export default function ScoreboardClient({
   const [showLeaveModal, setShowLeaveModal] = useState(false)
   const realtimeRefetching = useRef(false)
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     setPlayer1Total(initialPlayer1Total)
     setPlayer2Total(initialPlayer2Total)
