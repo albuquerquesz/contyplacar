@@ -8,6 +8,7 @@ import MatchList from '@/components/dashboard/MatchList'
 import InviteModal from '@/components/ui/InviteModal'
 import { Button } from '@/components/ui/Button'
 import { LogOut, Plus } from 'lucide-react'
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 
 type Player = {
   id: string
@@ -26,6 +27,18 @@ type Match = {
   player2: Player
 }
 
+function readPlayerIds(payload: RealtimePostgresChangesPayload<{ [key: string]: unknown }>) {
+  const next = payload.new as Record<string, unknown>
+  const previous = payload.old as Record<string, unknown>
+
+  return {
+    nextPlayer1Id: typeof next.player1_id === 'string' ? next.player1_id : null,
+    nextPlayer2Id: typeof next.player2_id === 'string' ? next.player2_id : null,
+    previousPlayer1Id: typeof previous.player1_id === 'string' ? previous.player1_id : null,
+    previousPlayer2Id: typeof previous.player2_id === 'string' ? previous.player2_id : null,
+  }
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const [matches, setMatches] = useState<Match[]>([])
@@ -40,16 +53,21 @@ export default function DashboardPage() {
   const [inviteLink, setInviteLink] = useState<string | null>(null)
   const isMountedRef = useRef(true)
 
-  const loadMatches = async (options?: { retry?: boolean }) => {
+  const loadMatches = async (options?: { retry?: boolean; silent?: boolean }) => {
     const isRetry = options?.retry === true
+    const isSilent = options?.silent === true
 
     if (isRetry) {
       setRetryingMatches(true)
-    } else {
+    }
+
+    if (!isSilent && !isRetry) {
       setLoading(true)
     }
 
-    setMatchesError(null)
+    if (!isSilent) {
+      setMatchesError(null)
+    }
 
     const supabase = createClient()
     const {
@@ -63,7 +81,9 @@ export default function DashboardPage() {
     if (!user) {
       if (isRetry) {
         setRetryingMatches(false)
-      } else {
+      }
+
+      if (!isSilent && !isRetry) {
         setLoading(false)
       }
       return
@@ -87,11 +107,16 @@ export default function DashboardPage() {
 
     if (error) {
       console.error('Failed to load matches:', error)
-      setMatchesError('Houve um problema ao buscar suas disputas. Tente novamente.')
+
+      if (!isSilent) {
+        setMatchesError('Houve um problema ao buscar suas disputas. Tente novamente.')
+      }
 
       if (isRetry) {
         setRetryingMatches(false)
-      } else {
+      }
+
+      if (!isSilent && !isRetry) {
         setLoading(false)
       }
       return
@@ -104,7 +129,9 @@ export default function DashboardPage() {
       return
     }
 
-    setLoading(false)
+    if (!isSilent) {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -115,6 +142,57 @@ export default function DashboardPage() {
       isMountedRef.current = false
     }
   }, [])
+
+  useEffect(() => {
+    if (!userId) {
+      return
+    }
+
+    const supabase = createClient()
+    const shouldRefetchMatches = (payload: RealtimePostgresChangesPayload<{ [key: string]: unknown }>) => {
+      const { nextPlayer1Id, nextPlayer2Id, previousPlayer1Id, previousPlayer2Id } = readPlayerIds(payload)
+
+      if (nextPlayer1Id === userId || nextPlayer2Id === userId) {
+        return true
+      }
+
+      if (previousPlayer1Id === userId || previousPlayer2Id === userId) {
+        return true
+      }
+
+      return false
+    }
+
+    const channel = supabase
+      .channel(`dashboard-matches-${userId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'matches' },
+        (payload) => {
+          if (!shouldRefetchMatches(payload)) {
+            return
+          }
+
+          void loadMatches({ silent: true })
+        },
+      )
+      .subscribe()
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') {
+        return
+      }
+
+      void loadMatches({ silent: true })
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      void supabase.removeChannel(channel)
+    }
+  }, [userId])
 
   const handleRetryMatches = async () => {
     await loadMatches({ retry: true })

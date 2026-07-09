@@ -53,7 +53,7 @@ export default function HistoryList({
   return (
     <div className="min-h-[420px]">
       {scoreEvents.length === 0 ? (
-        <div className="flex min-h-[240px] items-center justify-center rounded-lg border border-gray-200 bg-white">
+        <div className="flex h-[420px] items-center justify-center rounded-lg border border-gray-200 bg-white">
           <div className="max-w-sm text-center">
             <p className="text-lg font-medium text-foreground">Nenhum resultado ainda.</p>
             <p className="mt-1 text-base text-gray-500">
