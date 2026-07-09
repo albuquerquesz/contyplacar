@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import MatchList from '@/components/dashboard/MatchList'
@@ -30,55 +30,95 @@ export default function DashboardPage() {
   const router = useRouter()
   const [matches, setMatches] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
+  const [retryingMatches, setRetryingMatches] = useState(false)
+  const [matchesError, setMatchesError] = useState<string | null>(null)
   const [generating, setGenerating] = useState(false)
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
   const [userName, setUserName] = useState('Usuário')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [userId, setUserId] = useState('')
   const [inviteLink, setInviteLink] = useState<string | null>(null)
+  const isMountedRef = useRef(true)
 
-  useEffect(() => {
-    let active = true
+  const loadMatches = async (options?: { retry?: boolean }) => {
+    const isRetry = options?.retry === true
 
-    const loadMatches = async () => {
-      const supabase = createClient()
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (!user || !active) {
-        if (active) {
-          setLoading(false)
-        }
-        return
-      }
-
-      const metadata = user.user_metadata ?? {}
-      setUserId(user.id)
-      setUserName(metadata.name ?? user.email?.split('@')[0] ?? 'Usuário')
-      setAvatarUrl(metadata.avatar_url ?? null)
-
-      const { data, error } = await supabase
-        .from('matches')
-        .select('*, player1:profiles(player1_id, name, avatar_url), player2:profiles(player2_id, name, avatar_url)')
-        .or(`player1_id.eq.${user.id},player2_id.eq.${user.id}`)
-        .neq('status', 'completed')
-        .order('created_at', { ascending: false })
-
-      if (!active) return
-
-      if (!error && data) {
-        setMatches(data)
-      }
-      setLoading(false)
+    if (isRetry) {
+      setRetryingMatches(true)
+    } else {
+      setLoading(true)
     }
 
+    setMatchesError(null)
+
+    const supabase = createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!isMountedRef.current) {
+      return
+    }
+
+    if (!user) {
+      if (isRetry) {
+        setRetryingMatches(false)
+      } else {
+        setLoading(false)
+      }
+      return
+    }
+
+    const metadata = user.user_metadata ?? {}
+    setUserId(user.id)
+    setUserName(metadata.name ?? user.email?.split('@')[0] ?? 'Usuário')
+    setAvatarUrl(metadata.avatar_url ?? null)
+
+    const { data, error } = await supabase
+      .from('matches')
+      .select('*, player1:player1_id(id, name, avatar_url), player2:player2_id(id, name, avatar_url)')
+      .or(`player1_id.eq.${user.id},player2_id.eq.${user.id}`)
+      .neq('status', 'completed')
+      .order('created_at', { ascending: false })
+
+    if (!isMountedRef.current) {
+      return
+    }
+
+    if (error) {
+      console.error('Failed to load matches:', error)
+      setMatchesError('Houve um problema ao buscar suas disputas. Tente novamente.')
+
+      if (isRetry) {
+        setRetryingMatches(false)
+      } else {
+        setLoading(false)
+      }
+      return
+    }
+
+    setMatches(data ?? [])
+
+    if (isRetry) {
+      setRetryingMatches(false)
+      return
+    }
+
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    isMountedRef.current = true
     void loadMatches()
 
     return () => {
-      active = false
+      isMountedRef.current = false
     }
   }, [])
+
+  const handleRetryMatches = async () => {
+    await loadMatches({ retry: true })
+  }
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -186,7 +226,39 @@ export default function DashboardPage() {
           </Button>
         </div>
 
-        {matches.length === 0 ? (
+        {matchesError ? (
+          <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center mt-4">
+            <div className="mx-auto max-w-md text-center">
+              <div className="flex justify-center">
+                <div className="relative h-32 w-32">
+                  <svg viewBox="0 0 100 100" className="w-full h-full">
+                    <defs>
+                      <linearGradient id="errorTrophyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#fecaca" />
+                        <stop offset="100%" stopColor="#fca5a5" />
+                      </linearGradient>
+                    </defs>
+                    <ellipse cx="50" cy="55" rx="40" ry="25" fill="#fef2f2" />
+                    <path d="M35 30 L35 20 Q50 15 65 20 L65 30 L70 30 L70 40 Q70 50 60 50 L55 50 L55 65 L45 65 L45 50 L40 50 Q30 50 30 40 L30 30 L35 30 Z" fill="url(#errorTrophyGrad)" />
+                    <path d="M35 32 Q25 32 25 40 Q25 46 35 44" fill="none" stroke="#fca5a5" strokeWidth="3" strokeLinecap="round" />
+                    <path d="M65 32 Q75 32 75 40 Q75 46 65 44" fill="none" stroke="#fca5a5" strokeWidth="3" strokeLinecap="round" />
+                    <path d="M46 35 H54 V47 H46 Z" fill="#ef4444" rx="2" />
+                    <circle cx="50" cy="53" r="2.5" fill="#ef4444" />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="mt-3 text-2xl font-semibold tracking-tight text-gray-900">
+                Não foi possível carregar suas disputas
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-gray-500">
+                {matchesError}
+              </p>
+              <Button className="mt-6" variant="outline" onClick={handleRetryMatches} loading={retryingMatches}>
+                Tentar novamente
+              </Button>
+            </div>
+          </section>
+        ) : matches.length === 0 ? (
           <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center mt-4">
             <div className="mx-auto max-w-md text-center">
               <div className="flex justify-center">
