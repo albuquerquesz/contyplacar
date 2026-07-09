@@ -29,6 +29,11 @@ export default function ScoreSection({
   const timeLeft = remaining !== null && remaining > 0 ? `${Math.floor(remaining / 1000)}s` : ''
 
   useEffect(() => {
+    setHasSubmitted(currentScore !== null)
+    setSavedAt(updatedAt)
+  }, [currentScore, updatedAt])
+
+  useEffect(() => {
     const interval = setInterval(() => {
       setNow(Date.now())
     }, 1000)
@@ -45,6 +50,16 @@ export default function ScoreSection({
       body: JSON.stringify({ matchId, score }),
     })
     setLoading(false)
+
+    if (res.status === 403) {
+      const data = await res.json().catch(() => null)
+
+      if (data?.error === 'Edit window expired') {
+        onSaved?.(currentScore ?? 1)
+      }
+
+      return
+    }
 
     if (res.ok) {
       if (score === 0) {
