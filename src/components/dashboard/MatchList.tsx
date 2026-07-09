@@ -111,8 +111,7 @@ export default function MatchList({ matches, currentUserId, newMatchIds }: { mat
                 </>
               )
 
-              const rowProps = {
-                key: match.id,
+              const commonProps = {
                 role: 'link' as const,
                 tabIndex: 0,
                 onClick: () => openMatch(match.id),
@@ -129,7 +128,8 @@ export default function MatchList({ matches, currentUserId, newMatchIds }: { mat
               if (isNew) {
                 return (
                   <motion.tr
-                    {...rowProps}
+                    key={match.id}
+                    {...commonProps}
                     layout
                     initial={{ opacity: 0, y: -24, backgroundColor: '#eff6ff' }}
                     animate={{ opacity: 1, y: 0, backgroundColor: '#ffffff' }}
@@ -140,7 +140,7 @@ export default function MatchList({ matches, currentUserId, newMatchIds }: { mat
                 )
               }
 
-              return <TableRow {...rowProps}>{rowContent}</TableRow>
+              return <TableRow key={match.id} {...commonProps}>{rowContent}</TableRow>
             })}
           </TableBody>
         </Table>

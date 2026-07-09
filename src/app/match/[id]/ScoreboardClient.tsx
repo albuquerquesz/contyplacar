@@ -91,7 +91,8 @@ export default function ScoreboardClient({
   useEffect(() => {
     setPlayer1Total(initialPlayer1Total)
     setPlayer2Total(initialPlayer2Total)
-  }, [initialPlayer1Total, initialPlayer2Total])
+    setScoreEventsState(scoreEvents)
+  }, [initialPlayer1Total, initialPlayer2Total, scoreEvents])
 
   // Subscribe to score_events changes for live updates
   useEffect(() => {
@@ -171,17 +172,26 @@ export default function ScoreboardClient({
     realtimeRefetching.current = true
     setTimeout(() => { realtimeRefetching.current = false }, 1500)
     try {
-      const res = await fetch(`/api/scores?matchId=${matchId}`, {
-        cache: 'no-store',
-      })
-      if (!res.ok) return
-      const data = await res.json()
-      const newTotals: Record<string, number> = {}
-      data.forEach((s: { player_id: string; score: number }) => {
-        newTotals[s.player_id] = (newTotals[s.player_id] || 0) + s.score
-      })
-      setPlayer1Total(newTotals[player1.id] ?? 0)
-      setPlayer2Total(newTotals[player2.id] ?? 0)
+      const [scoresRes, eventsRes] = await Promise.all([
+        fetch(`/api/scores?matchId=${matchId}`, { cache: 'no-store' }),
+        fetch(`/api/score-events?matchId=${matchId}`, { cache: 'no-store' }),
+      ])
+
+      if (scoresRes.ok) {
+        const data = await scoresRes.json()
+        const newTotals: Record<string, number> = {}
+        data.forEach((s: { player_id: string; score: number }) => {
+          newTotals[s.player_id] = (newTotals[s.player_id] || 0) + s.score
+        })
+        setPlayer1Total(newTotals[player1.id] ?? 0)
+        setPlayer2Total(newTotals[player2.id] ?? 0)
+      }
+
+      if (eventsRes.ok) {
+        const events = await eventsRes.json()
+        setScoreEventsState(events)
+      }
+
       startTransition(() => {
         router.refresh()
       })
