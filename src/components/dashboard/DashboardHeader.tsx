@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import DashboardAccountMenu from '@/components/dashboard/DashboardAccountMenu'
+import ContyLogo from '@/components/ui/ContyLogo'
 import { createClient } from '@/lib/supabase/client'
 
 type DashboardHeaderProps = {
@@ -26,7 +27,7 @@ export default function DashboardHeader({
   return (
     <header className="border-b border-gray-200 bg-white">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-6 pb-5">
-        <div />
+        <ContyLogo className="h-10 w-auto" />
 
         <div className="flex items-center">
           <DashboardAccountMenu
