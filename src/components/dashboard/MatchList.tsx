@@ -103,8 +103,8 @@ export default function MatchList({ matches, currentUserId, newMatchIds }: { mat
                   <TableCell>
                     <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
                       match.game_mode === 'first_arrival'
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'bg-amber-50 text-amber-700'
+                        ? 'bg-sky-50 text-sky-700'
+                        : 'bg-indigo-100 text-indigo-800'
                     }`}>
                       {match.game_mode === 'first_arrival' ? 'Quem chega primeiro' : 'Quem sai por último'}
                     </span>

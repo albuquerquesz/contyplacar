@@ -189,8 +189,8 @@ export default function ScoreboardClient({
         <div className="flex justify-center">
           <span className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${
             gameMode === 'first_arrival'
-              ? 'bg-blue-50 text-blue-700'
-              : 'bg-amber-50 text-amber-700'
+              ? 'bg-sky-50 text-sky-700'
+              : 'bg-indigo-100 text-indigo-800'
           }`}>
             {gameMode === 'first_arrival' ? 'Quem chega primeiro' : 'Quem sai por último'}
           </span>

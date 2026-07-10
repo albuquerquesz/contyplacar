@@ -1,13 +1,15 @@
 'use client'
 
-import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import MatchList from '@/components/dashboard/MatchList'
 import InviteModal from '@/components/ui/InviteModal'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/Button'
-import { LogOut, Plus } from 'lucide-react'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Separator } from '@/components/ui/separator'
+import { Plus } from 'lucide-react'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 
 type Player = {
@@ -48,7 +50,9 @@ export default function DashboardPage() {
   const [matchesError, setMatchesError] = useState<string | null>(null)
   const [generating, setGenerating] = useState(false)
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
   const [userName, setUserName] = useState('Usuário')
+  const [userEmail, setUserEmail] = useState('')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [userId, setUserId] = useState('')
   const prevMatchIdsRef = useRef<Set<string>>(new Set())
@@ -95,6 +99,7 @@ export default function DashboardPage() {
     const metadata = user.user_metadata ?? {}
     setUserId(user.id)
     setUserName(metadata.name ?? user.email?.split('@')[0] ?? 'Usuário')
+    setUserEmail(user.email ?? '')
     setAvatarUrl(metadata.avatar_url ?? null)
 
     const { data, error } = await supabase
@@ -280,46 +285,62 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-gray-200">
+    <div className="min-h-screen bg-[#F8F7F5]">
+      <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-6 pb-5">
-          <div className="flex items-center gap-3">
-            <div className="relative h-12 w-12 overflow-hidden rounded-full bg-gray-200 ring-1 ring-gray-300">
-              {avatarUrl ? (
-                <Image
-                  src={avatarUrl}
-                  alt={userName}
-                  fill
-                  unoptimized
-                  className="object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-gray-100 text-sm font-semibold text-gray-600">
-                  {userName.slice(0, 1).toUpperCase()}
-                </div>
-              )}
-            </div>
-          </div>
+          <div />
 
-          <Button variant="ghost" onClick={handleSignOut} aria-label="Sair">
-            <LogOut className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center">
+            <DropdownMenu open={accountMenuOpen} onOpenChange={setAccountMenuOpen}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="rounded-full outline-none ring-offset-white transition-transform hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-blue-200"
+                  aria-label="Abrir menu da conta"
+                >
+                  <Avatar className="h-12 w-12 ring-1 ring-gray-300">
+                    <AvatarImage src={avatarUrl ?? undefined} alt={userName} />
+                    <AvatarFallback className="bg-gray-100 text-sm font-semibold text-gray-600">
+                      {userName.slice(0, 1).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" side="bottom" sideOffset={12} className="w-[17rem]">
+                <div className="px-5 py-4">
+                  <p className="text-lg font-semibold text-gray-900">{userName}</p>
+                  <p className="text-base text-gray-500">{userEmail}</p>
+                </div>
+                <Separator className="bg-gray-200" />
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setAccountMenuOpen(false)
+                    void handleSignOut()
+                  }}
+                  className="cursor-pointer capitalize"
+                >
+                  Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-bold leading-none text-gray-900">Suas Disputas</h2>
+      <div className="mx-auto max-w-4xl px-4 py-8">
+        <section className="rounded-3xl border border-gray-200 bg-white p-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold leading-none text-gray-900">Suas Disputas</h2>
+            </div>
+            <Button variant="primary" onClick={openInviteModal} disabled={generating}>
+              <Plus className="h-5 w-5" />
+              Convidar
+            </Button>
           </div>
-          <Button variant="primary" onClick={openInviteModal} disabled={generating}>
-            <Plus className="h-5 w-5" />
-            Convidar
-          </Button>
-        </div>
 
-        {matchesError ? (
-          <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center mt-4">
+          {matchesError ? (
+          <section className="mt-4 rounded-2xl border border-gray-200 bg-white p-12 text-center shadow-sm">
             <div className="mx-auto max-w-md text-center">
               <div className="flex justify-center">
                 <div className="relative h-32 w-32">
@@ -351,7 +372,7 @@ export default function DashboardPage() {
             </div>
           </section>
         ) : matches.length === 0 ? (
-          <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-12 text-center mt-4">
+          <section className="mt-4 rounded-2xl border border-gray-200 bg-white p-12 text-center shadow-sm">
             <div className="mx-auto max-w-md text-center">
               <div className="flex justify-center">
                 <div className="relative h-32 w-32">
@@ -395,6 +416,7 @@ export default function DashboardPage() {
             <MatchList matches={matches} currentUserId={userId} newMatchIds={newMatchIds} />
           </div>
         )}
+        </section>
       </div>
 
       <InviteModal
