@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import DashboardHeader from '@/components/dashboard/DashboardHeader'
 import DashboardMatchesSection from '@/components/dashboard/DashboardMatchesSection'
+import DashboardPromoCard from '@/components/dashboard/DashboardPromoCard'
 import InviteModal from '@/components/ui/InviteModal'
 
 export default function DashboardPage() {
@@ -92,8 +93,15 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[#F8F7F5]">
       <DashboardHeader userName={userName} userEmail={userEmail} avatarUrl={avatarUrl} />
 
-      <div className="mx-auto max-w-4xl px-4 py-8">
-        <DashboardMatchesSection userId={userId} onInvite={openInviteModal} inviteDisabled={generating} />
+      <div className="mx-auto max-w-6xl px-4 py-8">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+          <div className="min-w-0">
+            <DashboardMatchesSection userId={userId} onInvite={openInviteModal} inviteDisabled={generating} />
+          </div>
+          <div className="lg:sticky lg:top-6">
+            <DashboardPromoCard />
+          </div>
+        </div>
       </div>
 
       <InviteModal
