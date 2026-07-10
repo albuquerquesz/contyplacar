@@ -116,9 +116,9 @@ export default function InviteModal({ open, onCopy, onClose }: InviteModalProps)
             Modo de jogo
           </label>
           <Tabs value={gameMode} onValueChange={(v) => setGameMode(v as 'first_arrival' | 'last_departure')}>
-            <TabsList className="w-full">
-              <TabsTrigger value="first_arrival" className="flex-1">Quem chega primeiro</TabsTrigger>
-              <TabsTrigger value="last_departure" className="flex-1">Quem sai por último</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="first_arrival" className="w-full">Quem chega primeiro</TabsTrigger>
+              <TabsTrigger value="last_departure" className="w-full">Quem sai por último</TabsTrigger>
             </TabsList>
           </Tabs>
 
