@@ -93,8 +93,8 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[#F8F7F5]">
       <DashboardHeader userName={userName} userEmail={userEmail} avatarUrl={avatarUrl} />
 
-      <div className="mx-auto max-w-6xl px-4 py-8">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+      <div className="mx-auto max-w-[1400px] px-4 py-8">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
           <div className="min-w-0">
             <DashboardMatchesSection userId={userId} onInvite={openInviteModal} inviteDisabled={generating} />
           </div>

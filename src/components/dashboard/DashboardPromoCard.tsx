@@ -15,7 +15,7 @@ export default function DashboardPromoCard({
   description = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.',
   imageSrc = '/images/pedro-conty.jpg',
   imageAlt = '',
-  footerLabel = 'saiba mais →',
+  footerLabel = 'Saiba mais',
 }: DashboardPromoCardProps) {
   return (
     <aside
@@ -28,7 +28,7 @@ export default function DashboardPromoCard({
           alt={imageAlt}
           fill
           className="object-cover"
-          sizes="380px"
+          sizes="420px"
           priority={false}
         />
       </div>

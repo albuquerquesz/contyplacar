@@ -26,7 +26,7 @@ export default function DashboardHeader({
 
   return (
     <header className="border-b border-gray-200 bg-white">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-6 pb-5">
+      <div className="mx-auto flex max-w-[1400px] items-center justify-between px-4 py-6 pb-5">
         <ContyLogo className="h-10 w-auto" />
 
         <div className="flex items-center">
