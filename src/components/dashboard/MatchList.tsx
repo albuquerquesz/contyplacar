@@ -28,6 +28,7 @@ type Match = {
   status: string
   player1_left: boolean
   player2_left: boolean
+  game_mode: 'first_arrival' | 'last_departure'
   player1: Player
   player2: Player
 }
@@ -73,6 +74,7 @@ export default function MatchList({ matches, currentUserId, newMatchIds }: { mat
           <TableHeader className="bg-white">
             <TableRow className="hover:bg-white">
               <TableHead>Oponente</TableHead>
+              <TableHead>Modo</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Ação</TableHead>
             </TableRow>
@@ -97,6 +99,15 @@ export default function MatchList({ matches, currentUserId, newMatchIds }: { mat
                         <p className="truncate text-sm font-semibold text-gray-900">{opponent.name}</p>
                       </div>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                      match.game_mode === 'first_arrival'
+                        ? 'bg-blue-50 text-blue-700'
+                        : 'bg-amber-50 text-amber-700'
+                    }`}>
+                      {match.game_mode === 'first_arrival' ? 'Quem chega primeiro' : 'Quem sai por último'}
+                    </span>
                   </TableCell>
                   <TableCell>
                     <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">

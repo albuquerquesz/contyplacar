@@ -65,6 +65,8 @@ export default function ScoreboardClient({
   initialPlayer2Total,
   userScore,
   scoreEvents,
+  isSender,
+  gameMode,
 }: {
   matchId: string
   player1: Player
@@ -73,6 +75,8 @@ export default function ScoreboardClient({
   initialPlayer2Total: number
   userScore: number | null
   scoreEvents: { id: string; action: 'scored' | 'undid'; created_at: string; player: { id: string; name: string; avatar_url: string | null } }[]
+  isSender: boolean
+  gameMode: 'first_arrival' | 'last_departure'
 }) {
   const router = useRouter()
   const [player1Total, setPlayer1Total] = useState(initialPlayer1Total)
@@ -156,7 +160,8 @@ export default function ScoreboardClient({
 
   const handleLeave = async () => {
     try {
-      await fetch('/api/matches/leave', {
+      const endpoint = isSender ? '/api/matches/leave/sender' : '/api/matches/leave/opponent'
+      await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ matchId }),
@@ -181,6 +186,15 @@ export default function ScoreboardClient({
           </Button>
         </div>
 
+        <div className="flex justify-center">
+          <span className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${
+            gameMode === 'first_arrival'
+              ? 'bg-blue-50 text-blue-700'
+              : 'bg-amber-50 text-amber-700'
+          }`}>
+            {gameMode === 'first_arrival' ? 'Quem chega primeiro' : 'Quem sai por último'}
+          </span>
+        </div>
         <div>
           <div className="mt-4 grid grid-cols-2 gap-6 border-t border-gray-200 pt-8 sm:gap-8">
             <div className="flex flex-col items-center text-center">

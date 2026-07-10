@@ -4,10 +4,11 @@ import { useCallback, useEffect, useState } from 'react'
 import confetti from 'canvas-confetti'
 import { Copy, Check } from 'lucide-react'
 import { Button } from './Button'
+import { Tabs, TabsList, TabsTrigger } from './tabs'
 
 interface InviteModalProps {
   open: boolean
-  onCopy: (values: { senderInitialScore?: number; opponentInitialScore?: number }) => Promise<void>
+  onCopy: (values: { senderInitialScore?: number; opponentInitialScore?: number; gameMode: 'first_arrival' | 'last_departure' }) => Promise<void>
   onClose: () => void
 }
 
@@ -47,12 +48,14 @@ export default function InviteModal({ open, onCopy, onClose }: InviteModalProps)
   const [loading, setLoading] = useState(false)
   const [senderInitialScore, setSenderInitialScore] = useState('')
   const [opponentInitialScore, setOpponentInitialScore] = useState('')
+  const [gameMode, setGameMode] = useState<'first_arrival' | 'last_departure'>('first_arrival')
 
   const handleClose = useCallback(() => {
     setCopied(false)
     setLoading(false)
     setSenderInitialScore('')
     setOpponentInitialScore('')
+    setGameMode('first_arrival')
     onClose()
   }, [onClose])
 
@@ -62,6 +65,7 @@ export default function InviteModal({ open, onCopy, onClose }: InviteModalProps)
       setLoading(false)
       setSenderInitialScore('')
       setOpponentInitialScore('')
+      setGameMode('first_arrival')
     }
   }, [open])
 
@@ -82,6 +86,7 @@ export default function InviteModal({ open, onCopy, onClose }: InviteModalProps)
       await onCopy({
         senderInitialScore: parseScore(senderInitialScore),
         opponentInitialScore: parseScore(opponentInitialScore),
+        gameMode,
       })
       setCopied(true)
       confetti({
@@ -107,6 +112,16 @@ export default function InviteModal({ open, onCopy, onClose }: InviteModalProps)
         </p>
 
         <div className="space-y-4 mb-6">
+          <label htmlFor="game-mode" className="mb-2 block text-sm font-medium text-gray-700">
+            Modo de jogo
+          </label>
+          <Tabs value={gameMode} onValueChange={(v) => setGameMode(v as 'first_arrival' | 'last_departure')}>
+            <TabsList className="w-full">
+              <TabsTrigger value="first_arrival" className="flex-1">Quem chega primeiro</TabsTrigger>
+              <TabsTrigger value="last_departure" className="flex-1">Quem sai por último</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
           <div>
             <label htmlFor="sender-initial-score" className="mb-2 block text-sm font-medium text-gray-700">
               Seu valor inicial

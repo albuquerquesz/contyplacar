@@ -153,6 +153,8 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
       initialPlayer2Total={player2Total}
       userScore={userScore?.score ?? null}
       scoreEvents={scoreEvents}
+      isSender={match.player1.id === user.id}
+      gameMode={match.game_mode}
     />
   )
 }

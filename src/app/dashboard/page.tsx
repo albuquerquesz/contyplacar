@@ -23,6 +23,7 @@ type Match = {
   status: string
   player1_left: boolean
   player2_left: boolean
+  game_mode: 'first_arrival' | 'last_departure'
   player1: Player
   player2: Player
 }
@@ -226,9 +227,11 @@ export default function DashboardPage() {
   const handleInviteCopy = async ({
     senderInitialScore,
     opponentInitialScore,
+    gameMode,
   }: {
     senderInitialScore?: number
     opponentInitialScore?: number
+    gameMode: 'first_arrival' | 'last_departure'
   }) => {
     let nextLink = inviteLink
 
@@ -245,7 +248,7 @@ export default function DashboardPage() {
         const res = await fetch('/api/invitations', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ linkCode, senderInitialScore: senderScore, opponentInitialScore: opponentScore }),
+          body: JSON.stringify({ linkCode, senderInitialScore: senderScore, opponentInitialScore: opponentScore, gameMode }),
         })
 
         if (!res.ok) {
