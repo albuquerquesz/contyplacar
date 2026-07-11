@@ -29,7 +29,7 @@ async function acceptInvitationAction(formData: FormData) {
   const admin = createAdminClient()
   const { data: invitation, error: invitationError } = await admin
     .from('invitations')
-    .select('id, sender_id, expires_at, status, sender_initial_score, opponent_initial_score')
+    .select('id, sender_id, expires_at, status, sender_initial_score, opponent_initial_score, game_mode')
     .eq('link_code', code)
     .eq('status', 'pending')
     .single()
@@ -49,6 +49,7 @@ async function acceptInvitationAction(formData: FormData) {
       player1_id: invitation.sender_id,
       player2_id: user.id,
       status: 'active',
+      game_mode: invitation.game_mode,
     })
     .select('id')
     .single()
@@ -106,7 +107,7 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
   const admin = createAdminClient()
   const { data: invitation } = await admin
     .from('invitations')
-    .select('id, sender_id, expires_at, sender_initial_score, opponent_initial_score, sender:sender_id(id, name, email)')
+    .select('id, sender_id, expires_at, sender_initial_score, opponent_initial_score, game_mode, sender:sender_id(id, name, email)')
     .eq('link_code', code)
     .eq('status', 'pending')
     .single()
@@ -142,7 +143,7 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
         <div className="text-center max-w-md">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Aceitar Convite</h1>
           <p className="text-gray-500 mb-8">
-            Você vai criar uma disputa com {(invitation.sender as { name?: string } | null)?.name ?? 'este amigo'}.
+            Você vai criar uma disputa de <span className="font-medium text-gray-700">{invitation.game_mode === 'first_arrival' ? 'Quem chega primeiro' : 'Quem sai por último'}</span> com {(invitation.sender as { name?: string } | null)?.name ?? 'este amigo'}.
           </p>
           <AcceptButton />
         </div>

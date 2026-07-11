@@ -13,9 +13,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { linkCode, senderInitialScore, opponentInitialScore } = await request.json()
+  const { linkCode, senderInitialScore, opponentInitialScore, gameMode } = await request.json()
   const normalizedSenderInitialScore = senderInitialScore ?? 0
   const normalizedOpponentInitialScore = opponentInitialScore ?? 0
+  const normalizedGameMode = gameMode ?? 'first_arrival'
 
   if (!linkCode) {
     return NextResponse.json({ error: 'Missing linkCode' }, { status: 400 })
@@ -40,6 +41,7 @@ export async function POST(request: Request) {
     link_code: linkCode,
     sender_initial_score: normalizedSenderInitialScore,
     opponent_initial_score: normalizedOpponentInitialScore,
+    game_mode: normalizedGameMode,
     status: 'pending',
     expires_at: expiresAt,
   })
