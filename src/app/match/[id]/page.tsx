@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import type { HistoryEntry } from '@/components/scoreboard/types'
 import ScoreboardClient from './ScoreboardClient'
 
 type ScoreEvent = {
@@ -88,33 +87,6 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
   totalScores?.forEach(s => {
     totals[s.player_id] = (totals[s.player_id] || 0) + s.score
   })
-
-  const { data: allScores } = await supabase
-    .from('scores')
-    .select('player_id, score, updated_at, date')
-    .eq('match_id', id)
-    .order('updated_at', { ascending: false })
-
-  const playerById = {
-    [match.player1.id]: {
-      name: match.player1.name,
-      avatarUrl: match.player1.avatar_url,
-    },
-    [match.player2.id]: {
-      name: match.player2.name,
-      avatarUrl: match.player2.avatar_url,
-    },
-  }
-
-  const history: HistoryEntry[] = (allScores ?? [])
-    .filter(score => Boolean(score.updated_at) && score.player_id in playerById)
-    .map(score => ({
-      id: `${score.date}-${score.player_id}-${score.updated_at}`,
-      playerName: playerById[score.player_id].name,
-      playerAvatarUrl: playerById[score.player_id].avatarUrl,
-      score: score.score,
-      recordedAt: score.updated_at ?? '',
-    }))
 
   // Fetch score events for timeline
   const { data: events } = await supabase
