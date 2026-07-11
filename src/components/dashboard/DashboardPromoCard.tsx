@@ -10,11 +10,11 @@ type DashboardPromoCardProps = {
 }
 
 export default function DashboardPromoCard({
-  title = 'Contyplacar',
-  subtitle = 'Lorem ipsum dolor',
-  description = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.',
-  imageSrc = '/images/pedro-conty.jpg',
-  imageAlt = '',
+  title = 'Conty',
+  subtitle = 'Placar de disputas entre amigos',
+  description = 'Convide um colega, marque quem chega primeiro ou sai por último e acompanhe o placar no dia a dia — simples, social e sem planilha.',
+  imageSrc = '/Conty.jpg',
+  imageAlt = 'Conty App',
   footerLabel = 'Saiba mais',
 }: DashboardPromoCardProps) {
   return (
